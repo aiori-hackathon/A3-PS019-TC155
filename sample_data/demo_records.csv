@@ -1,3 +1,0 @@
-record_id,contact_email,pan_number,date_of_birth,notes
-case-001,person.one@example.com,ABCPD1234E,2004-02-29,Account opened
-case-002,not-an-email,INVALID123,not-a-date,No PII detected here
