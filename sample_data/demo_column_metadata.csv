@@ -1,0 +1,6 @@
+column_name,business_purpose,retention_period,data_owner,review_status
+record_id,Correlate records within the synthetic demonstration,180 days after case closure,Data Operations,draft
+contact_email,Contact the account holder in the synthetic demonstration,Until account closure plus 90 days,Customer Operations,draft
+pan_number,Demonstrate restricted-identifier detection handling,Per the approved project schedule,Governance Owner,draft
+date_of_birth,Demonstrate context-gated date-of-birth review,Per the approved project schedule,Governance Owner,draft
+notes,Provide non-PII context for the synthetic case,180 days after case closure,Case Operations,draft
