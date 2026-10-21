@@ -1,0 +1,33 @@
+# Declared purpose and retention, keyed by "source:table:column".
+# A field missing from this file (or missing a key) becomes an evidence gap.
+fields:
+  "onboarding.csv:-:customer_name":
+    purpose: Customer identification
+    retention: Account closure + 7 years
+    owner: Onboarding team
+  "onboarding.csv:-:national_id":
+    purpose: KYC identity verification
+    retention: Statutory (7 years)
+    owner: Compliance
+  "onboarding.csv:-:email_addr":
+    purpose: Service communication
+    retention: Account closure + 1 year
+    owner: Customer support
+  "onboarding.csv:-:mobile":
+    purpose: Two-factor authentication
+    owner: Security team            # retention deliberately missing
+  "onboarding.csv:-:dob":
+    retention: Account closure + 7 years   # purpose deliberately missing
+    owner: Onboarding team
+  "users.sqlite:acc:usr_contact":
+    purpose: Two-factor authentication
+    retention: Account closure + 180 days
+    owner: Security team
+  "users.sqlite:acc:full_name":
+    purpose: Account holder identification
+    retention: Account closure + 1 year
+    owner: Platform team
+  "users.sqlite:acc:contact_email":
+    purpose: Service communication
+    retention: Account closure + 1 year
+    owner: Platform team
