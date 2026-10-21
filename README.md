@@ -1,5 +1,4 @@
-# AIORI-3-HACKATHON-PROJECTS
-This repository will contain the code and resources for the AIORI-3 hackathon that will be developed during the AIORI-3
+
 
 # Privexis: Personal-Data Discovery and Privacy Evidence Inventory
 
@@ -11,6 +10,8 @@ links each to its declared purpose and retention metadata, and flags what is mis
 
 > **Scope:** the output is technical evidence for human review. Privexis makes no
 > legal or compliance determination and never decides a lawful basis.
+
+**New here?** Read [docs/HOW_IT_WORKS.md](docs/HOW_IT_WORKS.md) for a plain-language walkthrough of every file and how detection works.
 
 ## Quick start
 

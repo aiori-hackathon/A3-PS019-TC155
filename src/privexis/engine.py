@@ -92,7 +92,7 @@ def score_column(sample, rules, scoring) -> Finding:
         if best is None or cand[0] > best[0]:
             best = cand
 
-        conf, cls, ns, vs, ev = best
+    conf, cls, ns, vs, ev = best
     if conf < scoring["threshold"]:
         if conf == 0:
             ev = "no supporting evidence for any class"

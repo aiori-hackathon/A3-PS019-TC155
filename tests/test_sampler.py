@@ -1,44 +1,53 @@
-"""Bounded, deterministic sampling of column values using reservoir sampling."""
-import random
-from dataclasses import dataclass
+import csv
+import sqlite3
 
-from privexis.connectors import iter_tables
-
-
-@dataclass
-class ColumnSample:
-    source: str
-    table: str
-    column: str
-    values: list        # at most k non-empty values, as stripped strings
-    non_empty: int      # how many non-empty values the column had in total
+from privexis.sampler import sample_path
 
 
-def sample_path(path, k: int = 50, seed: int = 42) -> list:
-    """Return one ColumnSample per column in every table of the file."""
-    results = []
-    for table in iter_tables(path):
-        rng = random.Random(seed)            # own RNG: no hidden global state
-        n = len(table.columns)
-        reservoirs = [[] for _ in range(n)]
-        seen = [0] * n
+def make_csv(path, n):
+    with open(path, "w", newline="") as f:
+        w = csv.writer(f)
+        w.writerow(["a", "b"])
+        for i in range(n):
+            w.writerow([i, "" if i % 2 else "x"])
 
-        for row in table.rows:               # single pass over the data
-            for i, raw in enumerate(row[:n]):  # [:n] guards against ragged rows
-                if raw is None:
-                    continue
-                v = str(raw).strip()
-                if v == "":
-                    continue
-                seen[i] += 1
-                if len(reservoirs[i]) < k:
-                    reservoirs[i].append(v)
-                else:
-                    j = rng.randint(0, seen[i] - 1)
-                    if j < k:                # replace with probability k / seen
-                        reservoirs[i][j] = v
 
-        for i, col in enumerate(table.columns):
-            results.append(ColumnSample(table.source, table.name, col,
-                                        reservoirs[i], seen[i]))
-    return results
+def get(cols, name):
+    return next(c for c in cols if c.column == name)
+
+
+def test_sample_is_bounded(tmp_path):
+    p = tmp_path / "t.csv"
+    make_csv(p, 500)
+    a = get(sample_path(p, k=20), "a")
+    assert len(a.values) == 20
+    assert a.non_empty == 500
+
+
+def test_empty_values_are_skipped(tmp_path):
+    p = tmp_path / "t.csv"
+    make_csv(p, 500)
+    b = get(sample_path(p, k=20), "b")
+    assert b.non_empty == 250
+    assert "" not in b.values
+
+
+def test_sampling_is_deterministic(tmp_path):
+    p = tmp_path / "t.csv"
+    make_csv(p, 500)
+    first = get(sample_path(p, k=20), "a").values
+    second = get(sample_path(p, k=20), "a").values
+    assert first == second
+
+
+def test_sqlite_connector(tmp_path):
+    db = tmp_path / "t.sqlite"
+    con = sqlite3.connect(db)
+    con.execute("CREATE TABLE people (name TEXT, age INTEGER)")
+    con.executemany("INSERT INTO people VALUES (?,?)", [("Asha", 30), ("Rohan", 41)])
+    con.commit()
+    con.close()
+
+    cols = sample_path(db, k=5)
+    assert {c.table for c in cols} == {"people"}
+    assert sorted(get(cols, "age").values) == ["30", "41"]
