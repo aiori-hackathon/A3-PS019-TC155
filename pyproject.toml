@@ -10,3 +10,6 @@ dependencies = ["pyyaml"]
 
 [tool.setuptools.packages.find]
 where = ["src"]
+
+[project.scripts]
+privexis = "privexis.cli:main"
