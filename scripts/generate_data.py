@@ -129,6 +129,28 @@ for col, cls in [("user_id", "NONE"), ("usr_contact", "PHONE"),
                  ("contact_email", "EMAIL"), ("order_no", "NONE")]:
     label("users.sqlite", "acc", col, cls)
 
+# ---------- hard_cases.csv (columns that fool simple rules) ----------
+rows = []
+for i in range(N):
+    n = name()
+    rows.append({
+        "created_at": random_dob().isoformat(),    # date, but NOT a birth date
+        "emp_code": phone(),                        # 10 digits, but NOT a phone
+        "comments": email(n) if i % 4 == 0 else random.choice(
+            ["call back", "ok", "pending", "see notes"]),   # 25% emails, rest junk
+        "holder": random.choice(FIRST),             # first names only
+        "contact_person": n,                        # a name under a 'contact' header
+    })
+with open(OUT / "hard_cases.csv", "w", newline="") as f:
+    w = csv.DictWriter(f, fieldnames=rows[0].keys())
+    w.writeheader()
+    w.writerows(rows)
+
+for col, cls in [("created_at", "NONE"), ("emp_code", "NONE"),
+                 ("comments", "EMAIL"), ("holder", "NAME"),
+                 ("contact_person", "NAME")]:
+    label("hard_cases.csv", "-", col, cls)
+    
 # ---------- ground truth ----------
 with open(OUT / "labels.csv", "w", newline="") as f:
     w = csv.writer(f)

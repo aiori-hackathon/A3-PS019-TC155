@@ -16,3 +16,8 @@ users.sqlite,acc,full_name,NAME
 users.sqlite,acc,birth_date,DOB
 users.sqlite,acc,contact_email,EMAIL
 users.sqlite,acc,order_no,NONE
+hard_cases.csv,-,created_at,NONE
+hard_cases.csv,-,emp_code,NONE
+hard_cases.csv,-,comments,EMAIL
+hard_cases.csv,-,holder,NAME
+hard_cases.csv,-,contact_person,NAME

@@ -1,0 +1,83 @@
+{
+  "per_class": {
+    "NAME": {
+      "tp": 3,
+      "fp": 0,
+      "fn": 1,
+      "precision": 1.0,
+      "recall": 0.75,
+      "f1": 0.857
+    },
+    "EMAIL": {
+      "tp": 3,
+      "fp": 0,
+      "fn": 1,
+      "precision": 1.0,
+      "recall": 0.75,
+      "f1": 0.857
+    },
+    "PHONE": {
+      "tp": 3,
+      "fp": 1,
+      "fn": 0,
+      "precision": 0.75,
+      "recall": 1.0,
+      "f1": 0.857
+    },
+    "GOVT_ID": {
+      "tp": 2,
+      "fp": 0,
+      "fn": 0,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0
+    },
+    "DOB": {
+      "tp": 2,
+      "fp": 1,
+      "fn": 0,
+      "precision": 0.667,
+      "recall": 1.0,
+      "f1": 0.8
+    }
+  },
+  "errors": [
+    [
+      [
+        "hard_cases.csv",
+        "-",
+        "comments"
+      ],
+      "EMAIL",
+      "NONE"
+    ],
+    [
+      [
+        "hard_cases.csv",
+        "-",
+        "created_at"
+      ],
+      "NONE",
+      "DOB"
+    ],
+    [
+      [
+        "hard_cases.csv",
+        "-",
+        "emp_code"
+      ],
+      "NONE",
+      "PHONE"
+    ],
+    [
+      [
+        "hard_cases.csv",
+        "-",
+        "holder"
+      ],
+      "NAME",
+      "NONE"
+    ]
+  ],
+  "columns": 22
+}
