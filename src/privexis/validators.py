@@ -1,5 +1,6 @@
 """Strict validators: the 'is this really an X?' layer of the detection pipeline."""
 import re
+from datetime import date, datetime
 
 # --- Verhoeff checksum (used by Aadhaar) -----------------------------------
 # Three lookup tables: D = multiplication table of the dihedral group D5,
@@ -56,3 +57,20 @@ _EMAIL_RE = re.compile(r"^[A-Za-z0-9._%+-]+@[A-Za-z0-9-]+(\.[A-Za-z0-9-]+)+$")
 
 def is_email(value: str) -> bool:
     return bool(_EMAIL_RE.match(value.strip()))
+
+    # --- Combined government ID (Aadhaar or PAN) ---------------------------------
+def is_govt_id(value: str) -> bool:
+    return is_aadhaar_like(value) or is_pan(value)
+
+
+# --- Plausible date of birth ---------------------------------------------------
+def is_plausible_dob(value: str) -> bool:
+    """Parses ISO (1990-05-17) or DMY (17/05/1990); must fall between 1900 and today."""
+    v = value.strip()
+    for fmt in ("%Y-%m-%d", "%d/%m/%Y"):
+        try:
+            d = datetime.strptime(v, fmt).date()
+        except ValueError:
+            continue
+        return date(1900, 1, 1) <= d <= date.today()
+    return False

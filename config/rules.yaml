@@ -1,0 +1,37 @@
+# Detection rules. Edit this file to change what the scanner looks for.
+# confidence = name_weight * (name hint matched?) + value_weight * (fraction of sampled values that pass)
+scoring:
+  name_weight: 0.4
+  value_weight: 0.6
+  threshold: 0.5        # confidence needed to be flagged as a candidate
+
+classes:
+  NAME:
+    name_hints: [name, surname, fname, lname]
+    value_patterns:
+      - '^[A-Za-z][A-Za-z.-]*(\s+[A-Za-z][A-Za-z.-]*)+$'   # two or more words
+
+  EMAIL:
+    name_hints: [email, e_mail, mail]
+    value_patterns:
+      - '^[^@\s]+@[^@\s]+\.[^@\s]+$'                       # cheap shape check
+    validator: email                                        # strict check
+
+  PHONE:
+    name_hints: [phone, mobile, mob, tel, telephone, contact, cell, ph]
+    value_patterns:
+      - '^(\+91[\s-]?|0)?[6-9]\d{9}$'
+
+  GOVT_ID:
+    name_hints: [aadhaar, aadhar, uid, pan, national_id, govt_id, gov_id, tax_id]
+    value_patterns:
+      - '^\d{4}[\s-]?\d{4}[\s-]?\d{4}$'                    # Aadhaar shape
+      - '^[A-Za-z]{5}\d{4}[A-Za-z]$'                       # PAN shape
+    validator: govt_id                                      # Verhoeff / PAN check
+
+  DOB:
+    name_hints: [dob, birth, birthdate, birth_date, date_of_birth, born]
+    value_patterns:
+      - '^\d{4}-\d{2}-\d{2}$'
+      - '^\d{2}/\d{2}/\d{4}$'
+    validator: date_plausible
