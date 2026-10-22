@@ -1,8 +1,4 @@
-"""Privexis web app.  Run it with:   streamlit run app.py
 
-The page layout and styling live in src/privexis/ui.py. The scanning logic is the same
-pipeline the command line uses (src/privexis/pipeline.py).
-"""
 import sys
 import tempfile
 from pathlib import Path
@@ -21,7 +17,7 @@ from privexis.pipeline import (find_sources, metadata_template_csv, parse_metada
 from privexis.report import DISCLAIMER, write_gap_report, write_inventory
 
 CONFIG, DEMO_DATA = ROOT / "config", ROOT / "data"
-MAX_MB = 5
+MAX_MB = 25
 
 st.set_page_config(page_title="Privexis: find undocumented personal data",
                    page_icon="🟨", layout="wide")
