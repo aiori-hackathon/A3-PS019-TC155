@@ -2,7 +2,7 @@
 
 Team Infynex | AIORI Hackathon 3 | PS-019 (Cybersecurity)
 
-**Live demo:** https://YOUR-APP-NAME.streamlit.app  *(replace with your deployed link)*
+**Live demo:** https://a3-ps019-tc155-aiori.streamlit.app/ 
 
 Privexis scans **synthetic** CSV and SQLite data, finds candidate personal-data
 fields across five classes (name, email, phone, government ID, date of birth),
