@@ -5,7 +5,6 @@ from dataclasses import dataclass
 import yaml
 
 from privexis import validators as V
-from privexis.sampler import sample_path
 
 # Config refers to validators by name; this maps the names to real functions.
 VALIDATORS = {
@@ -101,7 +100,3 @@ def score_column(sample, rules, scoring) -> Finding:
         cls = "NONE"
     return Finding(sample.source, sample.table, sample.column,
                    cls, round(conf, 2), ns, round(vs, 2), ev)
-
-
-def scan_path(path, rules, scoring, k: int = 50) -> list:
-    return [score_column(s, rules, scoring) for s in sample_path(path, k=k)]

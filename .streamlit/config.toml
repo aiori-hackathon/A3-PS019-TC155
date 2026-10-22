@@ -1,0 +1,12 @@
+[server]
+maxUploadSize = 5
+
+[browser]
+gatherUsageStats = false
+
+[theme]
+base = "light"
+primaryColor = "#15181A"
+backgroundColor = "#F2F4EE"
+secondaryBackgroundColor = "#E3E8DD"
+textColor = "#15181A"

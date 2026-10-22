@@ -3,17 +3,11 @@ import argparse
 import json
 from pathlib import Path
 
-from privexis.engine import load_config, scan_path
+from privexis.engine import load_config
 from privexis.evaluator import evaluate, load_labels
-from privexis.linker import link, load_metadata, orphaned_metadata
+from privexis.linker import load_metadata
+from privexis.pipeline import find_sources, run_pipeline
 from privexis.report import write_gap_report, write_inventory
-
-SOURCE_SUFFIXES = {".csv", ".sqlite", ".sqlite3", ".db"}
-
-
-def find_sources(data_dir) -> list:
-    return [p for p in sorted(Path(data_dir).iterdir())
-            if p.suffix.lower() in SOURCE_SUFFIXES and p.name != "labels.csv"]
 
 
 def build_parser() -> argparse.ArgumentParser:
@@ -40,12 +34,9 @@ def run_scan(args) -> int:
     rules, scoring = load_config(config / "rules.yaml")
     metadata = load_metadata(config / "metadata.yaml")
 
-    findings = []
-    for path in find_sources(args.data):
-        findings += scan_path(path, rules, scoring, k=args.sample_size)
-
-    rows = link(findings, metadata)
-    orphans = orphaned_metadata(findings, metadata)
+    result = run_pipeline(find_sources(args.data), rules, scoring, metadata,
+                          k=args.sample_size)
+    findings, rows, orphans = result.findings, result.rows, result.orphans
     write_inventory(rows, args.out)
     write_gap_report(rows, orphans, args.out)
 
