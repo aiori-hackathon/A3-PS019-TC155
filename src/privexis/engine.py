@@ -1,6 +1,6 @@
 """Rule engine: fuse column-name hints + value patterns + validators into one score."""
 import re
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 
 import yaml
 
@@ -20,6 +20,8 @@ class Rule:
     name_hints: list
     patterns: list      # compiled regexes
     validator: object   # a function, or None
+    negative_hints: list = field(default_factory=list)   # column-name words that rule this class out
+    check: str = "pattern and validator"                  # plain-English name of the checks
 
 
 @dataclass
@@ -45,6 +47,8 @@ def load_config(path="config/rules.yaml"):
             [h.lower() for h in spec.get("name_hints", [])],
             [re.compile(p) for p in spec.get("value_patterns", [])],
             validator,
+            [h.lower() for h in spec.get("negative_hints", [])],
+            spec.get("check", "pattern and validator"),
         ))
     return rules, raw["scoring"]
 
@@ -74,8 +78,12 @@ def value_passes(v: str, rule: Rule) -> bool:
 
 
 def score_column(sample, rules, scoring) -> Finding:
-    best = None
+    best, excluded = None, []
     for rule in rules:
+        blocker = matched_hint(sample.column, rule.negative_hints)
+        if blocker:                      # e.g. 'created_at' can never be a date of birth
+            excluded.append(f"{rule.cls} excluded by negative hint '{blocker}'")
+            continue
         hint = matched_hint(sample.column, rule.name_hints)
         name_score = 1.0 if hint else 0.0
         vals = sample.values
@@ -86,17 +94,21 @@ def score_column(sample, rules, scoring) -> Finding:
         parts = []
         if hint:
             parts.append(f"name hint '{hint}'")
-        parts.append(f"{passed}/{len(vals)} sampled values passed pattern+validator")
+        parts.append(f"{passed}/{len(vals)} sampled values passed {rule.check}")
         cand = (conf, rule.cls, name_score, value_score, "; ".join(parts))
         if best is None or cand[0] > best[0]:
             best = cand
 
+    if best is None:                     # every class was excluded by a negative hint
+        best = (0.0, "NONE", 0.0, 0.0, "")
     conf, cls, ns, vs, ev = best
     if conf < scoring["threshold"]:
         if conf == 0:
-            ev = "no supporting evidence for any class"
+            ev = "; ".join(excluded) or "no supporting evidence for any class"
         else:
             ev = f"below threshold; closest class {cls}: {ev}"
+            if excluded:
+                ev += "; " + "; ".join(excluded)
         cls = "NONE"
     return Finding(sample.source, sample.table, sample.column,
                    cls, round(conf, 2), ns, round(vs, 2), ev)

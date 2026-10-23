@@ -20,7 +20,12 @@ GAP_LABELS = {
     "NO_METADATA_ENTRY": "Not documented",
     "MISSING_PURPOSE": "No purpose",
     "MISSING_RETENTION": "No retention period",
+    "MISSING_OWNER": "No owner",
+    "MISSING_NAME_HINT": "No name hint",
+    "MISSING_VALUE_CHECK": "Values fail the check",
 }
+# Gaps that "Not documented" already covers, so they are not repeated as extra chips.
+_METADATA_GAPS = {"MISSING_PURPOSE", "MISSING_RETENTION", "MISSING_OWNER"}
 
 
 def _e(value) -> str:
@@ -130,13 +135,22 @@ def tag_html(row, examples, threshold: float) -> str:
     conf = max(0.0, min(float(row.confidence), 1.0))
     thr = max(0.0, min(float(threshold), 1.0))
 
-    if "NO_METADATA_ENTRY" in row.gaps:
-        chips = f'<span class="px-chip gap">{GAP_LABELS["NO_METADATA_ENTRY"]}</span>'
-    elif row.gaps:
+    gaps = list(row.gaps)
+    if "NO_METADATA_ENTRY" in gaps:
+        gaps = [g for g in gaps if g not in _METADATA_GAPS]
+    if gaps:
         chips = "".join(f'<span class="px-chip gap">{GAP_LABELS.get(g, _e(g))}</span>'
-                        for g in row.gaps)
+                        for g in gaps)
     else:
-        chips = '<span class="px-chip ok">Documented</span>'
+        chips = '<span class="px-chip ok">Checklist complete</span>'
+
+    # detection evidence the scanner collected itself (kind "detection" in checklist.yaml)
+    marks = "".join(
+        f'<li class="{"yes" if c["present"] else "no"}">'
+        f'{"Yes" if c["present"] else "No"}: {_e(c["label"])}'
+        f'{" (required)" if c["required"] else "" if c["present"] else " (advisory)"}</li>'
+        for c in (getattr(row, "checklist", None) or []) if c["kind"] == "detection")
+    detection = f'<ul class="px-marks">{marks}</ul>' if marks else ""
 
     shown = "".join(f"<code>{_e(mask_value(v))}</code>" for v in (examples or [])[:3])
     sample_row = f'<div class="px-examples" aria-label="Masked example values">{shown}</div>' if shown else ""
@@ -157,6 +171,7 @@ def tag_html(row, examples, threshold: float) -> str:
         f'<div class="px-chips">{chips}</div>'
         f'<dl class="px-meta">{line("Purpose", row.purpose)}{line("Retention", row.retention)}'
         f'{line("Owner", row.owner)}</dl>'
+        f'{detection}'
         f'<p class="px-why">{_e(row.evidence)}</p>'
         '</article>'
     )
@@ -170,6 +185,14 @@ def unflagged_html(findings) -> str:
     items = "".join(
         f'<li><code>{_e(f.column)}</code><span>{_e(f.evidence)}</span></li>' for f in findings)
     return f'<ul class="px-plain">{items}</ul>'
+
+
+def review_html(findings) -> str:
+    """Columns that were not flagged but scored between the review floor and the threshold."""
+    items = "".join(
+        f'<li><code>{_e(f.column)}</code><span>{_e(f.source)}: {_e(f.evidence)}</span></li>'
+        for f in findings)
+    return f'<ul class="px-plain px-review">{items}</ul>'
 
 
 def orphans_html(orphans: list) -> str:
@@ -226,7 +249,7 @@ def split_html(disclaimer: str) -> str:
         '<div class="px-found"><h3>What Privexis found</h3><ul>'
         '<li>Which columns look like the five data classes</li>'
         '<li>The score and the reasons behind each decision</li>'
-        '<li>Whether a purpose, retention period and owner are declared</li>'
+        '<li>Which items on the evidence checklist are present or missing</li>'
         '<li>Declared metadata that points at nothing</li></ul></div>'
         '<div class="px-decide"><h3>What a person must decide</h3><ul>'
         '<li>Whether a flagged column really is personal data</li>'
@@ -331,6 +354,13 @@ _CSS = """
 @@dl.px-meta dt{color:var(--mute);margin:0;}
 @@dl.px-meta dd{margin:0;overflow-wrap:anywhere;}
 @@.px-none{color:var(--mute);font-style:italic;}
+@@ul.px-marks{list-style:none;margin:0;padding:0;display:grid;gap:3px;font:400 .85rem/1.3 var(--body);}
+@@ul.px-marks li{margin:0;padding-left:1.3rem;position:relative;}
+@@ul.px-marks li::before{position:absolute;left:0;font-weight:700;}
+@@ul.px-marks li.yes::before{content:"\\2713";}
+@@ul.px-marks li.no{color:var(--mute);}
+@@ul.px-marks li.no::before{content:"\\2013";}
+@@ul.px-review li{padding:10px 12px;background:var(--panel);border:2px dashed var(--ink);border-radius:8px;}
 @@p.px-why{font:400 .8rem/1.4 var(--body);color:var(--mute);margin:0;padding-top:8px;border-top:1px dashed var(--mute);}
 
 /* ---- plain lists ---- */

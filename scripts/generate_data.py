@@ -1,5 +1,8 @@
-"""Generate synthetic CSV + SQLite data and the ground-truth label file.
-Everything here is FAKE. A fixed seed makes the output reproducible."""
+"""Generate the synthetic CSV + SQLite files. Everything here is FAKE.
+A fixed seed makes the output reproducible.
+
+This script does NOT write data/labels.csv. The answer key is labelled by hand
+(see docs/LABELLING.md), so it is independent of the code that makes the data."""
 import csv
 import random
 import sqlite3
@@ -62,13 +65,6 @@ def decoy_10_digit():
     return random.choice("12345") + "".join(random.choices(DIGITS, k=9))
 
 
-labels = []  # (source, table, column, true_class)
-
-
-def label(source, table, col, cls):
-    labels.append((source, table, col, cls))
-
-
 # ---------- onboarding.csv ----------
 rows = []
 for i in range(N):
@@ -87,10 +83,6 @@ with open(OUT / "onboarding.csv", "w", newline="") as f:
     w.writeheader()
     w.writerows(rows)
 
-for col, cls in [("customer_name", "NAME"), ("national_id", "GOVT_ID"),
-                 ("email_addr", "EMAIL"), ("mobile", "PHONE"), ("dob", "DOB"),
-                 ("city", "NONE"), ("ref_no", "NONE")]:
-    label("onboarding.csv", "-", col, cls)
 
 # ---------- temp_dump.csv (undocumented leftovers) ----------
 rows = []
@@ -103,9 +95,6 @@ with open(OUT / "temp_dump.csv", "w", newline="") as f:
     w.writeheader()
     w.writerows(rows)
 
-for col, cls in [("tmp_mail", "EMAIL"), ("tmp_id", "GOVT_ID"),
-                 ("tmp_ph", "PHONE"), ("misc_code", "NONE")]:
-    label("temp_dump.csv", "-", col, cls)
 
 # ---------- users.sqlite ----------
 db = OUT / "users.sqlite"
@@ -124,10 +113,6 @@ for i in range(N):
 con.commit()
 con.close()
 
-for col, cls in [("user_id", "NONE"), ("usr_contact", "PHONE"),
-                 ("full_name", "NAME"), ("birth_date", "DOB"),
-                 ("contact_email", "EMAIL"), ("order_no", "NONE")]:
-    label("users.sqlite", "acc", col, cls)
 
 # ---------- hard_cases.csv (columns that fool simple rules) ----------
 rows = []
@@ -146,15 +131,5 @@ with open(OUT / "hard_cases.csv", "w", newline="") as f:
     w.writeheader()
     w.writerows(rows)
 
-for col, cls in [("created_at", "NONE"), ("emp_code", "NONE"),
-                 ("comments", "EMAIL"), ("holder", "NAME"),
-                 ("contact_person", "NAME")]:
-    label("hard_cases.csv", "-", col, cls)
-    
-# ---------- ground truth ----------
-with open(OUT / "labels.csv", "w", newline="") as f:
-    w = csv.writer(f)
-    w.writerow(["source", "table", "column", "true_class"])
-    w.writerows(labels)
-
-print(f"Done. {len(labels)} labelled columns written to {OUT}/")
+print(f"Done. Synthetic data written to {OUT}/")
+print("Note: data/labels.csv is the hand-written answer key. This script does not touch it.")

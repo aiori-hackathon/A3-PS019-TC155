@@ -1,54 +1,58 @@
 {
-  "disclaimer": "TECHNICAL EVIDENCE ONLY. This report lists candidate personal-data fields and whether declared purpose/retention metadata exists. It makes no legal or compliance determination. Lawful basis and adequacy of purpose or retention are for a human reviewer to decide.",
+  "disclaimer": "TECHNICAL EVIDENCE ONLY. This report lists candidate personal-data fields and whether the evidence on the configured checklist is present. It makes no legal or compliance determination. Lawful basis and the adequacy of any purpose or retention period are for a human reviewer to decide.",
   "fields": [
-    {
-      "source": "hard_cases.csv",
-      "table": "-",
-      "column": "created_at",
-      "cls": "DOB",
-      "confidence": 0.6,
-      "evidence": "50/50 sampled values passed pattern+validator",
-      "purpose": "",
-      "retention": "",
-      "owner": "",
-      "gaps": [
-        "NO_METADATA_ENTRY",
-        "MISSING_PURPOSE",
-        "MISSING_RETENTION"
-      ],
-      "review_status": "EVIDENCE GAP FLAG"
-    },
-    {
-      "source": "hard_cases.csv",
-      "table": "-",
-      "column": "emp_code",
-      "cls": "PHONE",
-      "confidence": 0.6,
-      "evidence": "50/50 sampled values passed pattern+validator",
-      "purpose": "",
-      "retention": "",
-      "owner": "",
-      "gaps": [
-        "NO_METADATA_ENTRY",
-        "MISSING_PURPOSE",
-        "MISSING_RETENTION"
-      ],
-      "review_status": "EVIDENCE GAP FLAG"
-    },
     {
       "source": "hard_cases.csv",
       "table": "-",
       "column": "contact_person",
       "cls": "NAME",
       "confidence": 0.6,
-      "evidence": "50/50 sampled values passed pattern+validator",
+      "evidence": "50/50 sampled values passed alphabetic pattern of two or more words",
       "purpose": "",
       "retention": "",
       "owner": "",
       "gaps": [
         "NO_METADATA_ENTRY",
         "MISSING_PURPOSE",
-        "MISSING_RETENTION"
+        "MISSING_RETENTION",
+        "MISSING_OWNER"
+      ],
+      "checklist": [
+        {
+          "item": "purpose",
+          "label": "Declared purpose",
+          "kind": "metadata",
+          "required": true,
+          "present": false
+        },
+        {
+          "item": "retention",
+          "label": "Retention period",
+          "kind": "metadata",
+          "required": true,
+          "present": false
+        },
+        {
+          "item": "owner",
+          "label": "Data owner",
+          "kind": "metadata",
+          "required": true,
+          "present": false
+        },
+        {
+          "item": "name_hint",
+          "label": "Column name matches a known hint",
+          "kind": "detection",
+          "required": false,
+          "present": false
+        },
+        {
+          "item": "value_check",
+          "label": "Sampled values pass the class checks",
+          "kind": "detection",
+          "required": false,
+          "present": true
+        }
       ],
       "review_status": "EVIDENCE GAP FLAG"
     },
@@ -58,12 +62,49 @@
       "column": "customer_name",
       "cls": "NAME",
       "confidence": 1.0,
-      "evidence": "name hint 'name'; 50/50 sampled values passed pattern+validator",
+      "evidence": "name hint 'name'; 50/50 sampled values passed alphabetic pattern of two or more words",
       "purpose": "Customer identification",
       "retention": "Account closure + 7 years",
       "owner": "Onboarding team",
       "gaps": [],
-      "review_status": "Candidate - metadata linked"
+      "checklist": [
+        {
+          "item": "purpose",
+          "label": "Declared purpose",
+          "kind": "metadata",
+          "required": true,
+          "present": true
+        },
+        {
+          "item": "retention",
+          "label": "Retention period",
+          "kind": "metadata",
+          "required": true,
+          "present": true
+        },
+        {
+          "item": "owner",
+          "label": "Data owner",
+          "kind": "metadata",
+          "required": true,
+          "present": true
+        },
+        {
+          "item": "name_hint",
+          "label": "Column name matches a known hint",
+          "kind": "detection",
+          "required": false,
+          "present": true
+        },
+        {
+          "item": "value_check",
+          "label": "Sampled values pass the class checks",
+          "kind": "detection",
+          "required": false,
+          "present": true
+        }
+      ],
+      "review_status": "Candidate: checklist complete"
     },
     {
       "source": "onboarding.csv",
@@ -71,12 +112,49 @@
       "column": "national_id",
       "cls": "GOVT_ID",
       "confidence": 1.0,
-      "evidence": "name hint 'national_id'; 50/50 sampled values passed pattern+validator",
+      "evidence": "name hint 'national_id'; 50/50 sampled values passed Verhoeff checksum (Aadhaar-style) or PAN format",
       "purpose": "KYC identity verification",
       "retention": "Statutory (7 years)",
       "owner": "Compliance",
       "gaps": [],
-      "review_status": "Candidate - metadata linked"
+      "checklist": [
+        {
+          "item": "purpose",
+          "label": "Declared purpose",
+          "kind": "metadata",
+          "required": true,
+          "present": true
+        },
+        {
+          "item": "retention",
+          "label": "Retention period",
+          "kind": "metadata",
+          "required": true,
+          "present": true
+        },
+        {
+          "item": "owner",
+          "label": "Data owner",
+          "kind": "metadata",
+          "required": true,
+          "present": true
+        },
+        {
+          "item": "name_hint",
+          "label": "Column name matches a known hint",
+          "kind": "detection",
+          "required": false,
+          "present": true
+        },
+        {
+          "item": "value_check",
+          "label": "Sampled values pass the class checks",
+          "kind": "detection",
+          "required": true,
+          "present": true
+        }
+      ],
+      "review_status": "Candidate: checklist complete"
     },
     {
       "source": "onboarding.csv",
@@ -84,12 +162,49 @@
       "column": "email_addr",
       "cls": "EMAIL",
       "confidence": 1.0,
-      "evidence": "name hint 'email'; 50/50 sampled values passed pattern+validator",
+      "evidence": "name hint 'email'; 50/50 sampled values passed RFC 5322-style email syntax",
       "purpose": "Service communication",
       "retention": "Account closure + 1 year",
       "owner": "Customer support",
       "gaps": [],
-      "review_status": "Candidate - metadata linked"
+      "checklist": [
+        {
+          "item": "purpose",
+          "label": "Declared purpose",
+          "kind": "metadata",
+          "required": true,
+          "present": true
+        },
+        {
+          "item": "retention",
+          "label": "Retention period",
+          "kind": "metadata",
+          "required": true,
+          "present": true
+        },
+        {
+          "item": "owner",
+          "label": "Data owner",
+          "kind": "metadata",
+          "required": true,
+          "present": true
+        },
+        {
+          "item": "name_hint",
+          "label": "Column name matches a known hint",
+          "kind": "detection",
+          "required": false,
+          "present": true
+        },
+        {
+          "item": "value_check",
+          "label": "Sampled values pass the class checks",
+          "kind": "detection",
+          "required": false,
+          "present": true
+        }
+      ],
+      "review_status": "Candidate: checklist complete"
     },
     {
       "source": "onboarding.csv",
@@ -97,12 +212,49 @@
       "column": "mobile",
       "cls": "PHONE",
       "confidence": 1.0,
-      "evidence": "name hint 'mobile'; 50/50 sampled values passed pattern+validator",
+      "evidence": "name hint 'mobile'; 50/50 sampled values passed 10-digit mobile pattern (optional +91)",
       "purpose": "Two-factor authentication",
       "retention": "",
       "owner": "Security team",
       "gaps": [
         "MISSING_RETENTION"
+      ],
+      "checklist": [
+        {
+          "item": "purpose",
+          "label": "Declared purpose",
+          "kind": "metadata",
+          "required": true,
+          "present": true
+        },
+        {
+          "item": "retention",
+          "label": "Retention period",
+          "kind": "metadata",
+          "required": true,
+          "present": false
+        },
+        {
+          "item": "owner",
+          "label": "Data owner",
+          "kind": "metadata",
+          "required": true,
+          "present": true
+        },
+        {
+          "item": "name_hint",
+          "label": "Column name matches a known hint",
+          "kind": "detection",
+          "required": false,
+          "present": true
+        },
+        {
+          "item": "value_check",
+          "label": "Sampled values pass the class checks",
+          "kind": "detection",
+          "required": false,
+          "present": true
+        }
       ],
       "review_status": "EVIDENCE GAP FLAG"
     },
@@ -112,12 +264,49 @@
       "column": "dob",
       "cls": "DOB",
       "confidence": 1.0,
-      "evidence": "name hint 'dob'; 50/50 sampled values passed pattern+validator",
+      "evidence": "name hint 'dob'; 50/50 sampled values passed ISO or DD/MM/YYYY date between 1900 and today",
       "purpose": "",
       "retention": "Account closure + 7 years",
       "owner": "Onboarding team",
       "gaps": [
         "MISSING_PURPOSE"
+      ],
+      "checklist": [
+        {
+          "item": "purpose",
+          "label": "Declared purpose",
+          "kind": "metadata",
+          "required": true,
+          "present": false
+        },
+        {
+          "item": "retention",
+          "label": "Retention period",
+          "kind": "metadata",
+          "required": true,
+          "present": true
+        },
+        {
+          "item": "owner",
+          "label": "Data owner",
+          "kind": "metadata",
+          "required": true,
+          "present": true
+        },
+        {
+          "item": "name_hint",
+          "label": "Column name matches a known hint",
+          "kind": "detection",
+          "required": false,
+          "present": true
+        },
+        {
+          "item": "value_check",
+          "label": "Sampled values pass the class checks",
+          "kind": "detection",
+          "required": false,
+          "present": true
+        }
       ],
       "review_status": "EVIDENCE GAP FLAG"
     },
@@ -127,14 +316,52 @@
       "column": "tmp_mail",
       "cls": "EMAIL",
       "confidence": 1.0,
-      "evidence": "name hint 'mail'; 50/50 sampled values passed pattern+validator",
+      "evidence": "name hint 'mail'; 50/50 sampled values passed RFC 5322-style email syntax",
       "purpose": "",
       "retention": "",
       "owner": "",
       "gaps": [
         "NO_METADATA_ENTRY",
         "MISSING_PURPOSE",
-        "MISSING_RETENTION"
+        "MISSING_RETENTION",
+        "MISSING_OWNER"
+      ],
+      "checklist": [
+        {
+          "item": "purpose",
+          "label": "Declared purpose",
+          "kind": "metadata",
+          "required": true,
+          "present": false
+        },
+        {
+          "item": "retention",
+          "label": "Retention period",
+          "kind": "metadata",
+          "required": true,
+          "present": false
+        },
+        {
+          "item": "owner",
+          "label": "Data owner",
+          "kind": "metadata",
+          "required": true,
+          "present": false
+        },
+        {
+          "item": "name_hint",
+          "label": "Column name matches a known hint",
+          "kind": "detection",
+          "required": false,
+          "present": true
+        },
+        {
+          "item": "value_check",
+          "label": "Sampled values pass the class checks",
+          "kind": "detection",
+          "required": false,
+          "present": true
+        }
       ],
       "review_status": "EVIDENCE GAP FLAG"
     },
@@ -144,14 +371,52 @@
       "column": "tmp_id",
       "cls": "GOVT_ID",
       "confidence": 0.6,
-      "evidence": "50/50 sampled values passed pattern+validator",
+      "evidence": "50/50 sampled values passed Verhoeff checksum (Aadhaar-style) or PAN format",
       "purpose": "",
       "retention": "",
       "owner": "",
       "gaps": [
         "NO_METADATA_ENTRY",
         "MISSING_PURPOSE",
-        "MISSING_RETENTION"
+        "MISSING_RETENTION",
+        "MISSING_OWNER"
+      ],
+      "checklist": [
+        {
+          "item": "purpose",
+          "label": "Declared purpose",
+          "kind": "metadata",
+          "required": true,
+          "present": false
+        },
+        {
+          "item": "retention",
+          "label": "Retention period",
+          "kind": "metadata",
+          "required": true,
+          "present": false
+        },
+        {
+          "item": "owner",
+          "label": "Data owner",
+          "kind": "metadata",
+          "required": true,
+          "present": false
+        },
+        {
+          "item": "name_hint",
+          "label": "Column name matches a known hint",
+          "kind": "detection",
+          "required": false,
+          "present": false
+        },
+        {
+          "item": "value_check",
+          "label": "Sampled values pass the class checks",
+          "kind": "detection",
+          "required": true,
+          "present": true
+        }
       ],
       "review_status": "EVIDENCE GAP FLAG"
     },
@@ -161,14 +426,52 @@
       "column": "tmp_ph",
       "cls": "PHONE",
       "confidence": 1.0,
-      "evidence": "name hint 'ph'; 50/50 sampled values passed pattern+validator",
+      "evidence": "name hint 'ph'; 50/50 sampled values passed 10-digit mobile pattern (optional +91)",
       "purpose": "",
       "retention": "",
       "owner": "",
       "gaps": [
         "NO_METADATA_ENTRY",
         "MISSING_PURPOSE",
-        "MISSING_RETENTION"
+        "MISSING_RETENTION",
+        "MISSING_OWNER"
+      ],
+      "checklist": [
+        {
+          "item": "purpose",
+          "label": "Declared purpose",
+          "kind": "metadata",
+          "required": true,
+          "present": false
+        },
+        {
+          "item": "retention",
+          "label": "Retention period",
+          "kind": "metadata",
+          "required": true,
+          "present": false
+        },
+        {
+          "item": "owner",
+          "label": "Data owner",
+          "kind": "metadata",
+          "required": true,
+          "present": false
+        },
+        {
+          "item": "name_hint",
+          "label": "Column name matches a known hint",
+          "kind": "detection",
+          "required": false,
+          "present": true
+        },
+        {
+          "item": "value_check",
+          "label": "Sampled values pass the class checks",
+          "kind": "detection",
+          "required": false,
+          "present": true
+        }
       ],
       "review_status": "EVIDENCE GAP FLAG"
     },
@@ -178,12 +481,49 @@
       "column": "usr_contact",
       "cls": "PHONE",
       "confidence": 1.0,
-      "evidence": "name hint 'contact'; 50/50 sampled values passed pattern+validator",
+      "evidence": "name hint 'contact'; 50/50 sampled values passed 10-digit mobile pattern (optional +91)",
       "purpose": "Two-factor authentication",
       "retention": "Account closure + 180 days",
       "owner": "Security team",
       "gaps": [],
-      "review_status": "Candidate - metadata linked"
+      "checklist": [
+        {
+          "item": "purpose",
+          "label": "Declared purpose",
+          "kind": "metadata",
+          "required": true,
+          "present": true
+        },
+        {
+          "item": "retention",
+          "label": "Retention period",
+          "kind": "metadata",
+          "required": true,
+          "present": true
+        },
+        {
+          "item": "owner",
+          "label": "Data owner",
+          "kind": "metadata",
+          "required": true,
+          "present": true
+        },
+        {
+          "item": "name_hint",
+          "label": "Column name matches a known hint",
+          "kind": "detection",
+          "required": false,
+          "present": true
+        },
+        {
+          "item": "value_check",
+          "label": "Sampled values pass the class checks",
+          "kind": "detection",
+          "required": false,
+          "present": true
+        }
+      ],
+      "review_status": "Candidate: checklist complete"
     },
     {
       "source": "users.sqlite",
@@ -191,12 +531,49 @@
       "column": "full_name",
       "cls": "NAME",
       "confidence": 1.0,
-      "evidence": "name hint 'name'; 50/50 sampled values passed pattern+validator",
+      "evidence": "name hint 'name'; 50/50 sampled values passed alphabetic pattern of two or more words",
       "purpose": "Account holder identification",
       "retention": "Account closure + 1 year",
       "owner": "Platform team",
       "gaps": [],
-      "review_status": "Candidate - metadata linked"
+      "checklist": [
+        {
+          "item": "purpose",
+          "label": "Declared purpose",
+          "kind": "metadata",
+          "required": true,
+          "present": true
+        },
+        {
+          "item": "retention",
+          "label": "Retention period",
+          "kind": "metadata",
+          "required": true,
+          "present": true
+        },
+        {
+          "item": "owner",
+          "label": "Data owner",
+          "kind": "metadata",
+          "required": true,
+          "present": true
+        },
+        {
+          "item": "name_hint",
+          "label": "Column name matches a known hint",
+          "kind": "detection",
+          "required": false,
+          "present": true
+        },
+        {
+          "item": "value_check",
+          "label": "Sampled values pass the class checks",
+          "kind": "detection",
+          "required": false,
+          "present": true
+        }
+      ],
+      "review_status": "Candidate: checklist complete"
     },
     {
       "source": "users.sqlite",
@@ -204,14 +581,52 @@
       "column": "birth_date",
       "cls": "DOB",
       "confidence": 1.0,
-      "evidence": "name hint 'birth'; 50/50 sampled values passed pattern+validator",
+      "evidence": "name hint 'birth'; 50/50 sampled values passed ISO or DD/MM/YYYY date between 1900 and today",
       "purpose": "",
       "retention": "",
       "owner": "",
       "gaps": [
         "NO_METADATA_ENTRY",
         "MISSING_PURPOSE",
-        "MISSING_RETENTION"
+        "MISSING_RETENTION",
+        "MISSING_OWNER"
+      ],
+      "checklist": [
+        {
+          "item": "purpose",
+          "label": "Declared purpose",
+          "kind": "metadata",
+          "required": true,
+          "present": false
+        },
+        {
+          "item": "retention",
+          "label": "Retention period",
+          "kind": "metadata",
+          "required": true,
+          "present": false
+        },
+        {
+          "item": "owner",
+          "label": "Data owner",
+          "kind": "metadata",
+          "required": true,
+          "present": false
+        },
+        {
+          "item": "name_hint",
+          "label": "Column name matches a known hint",
+          "kind": "detection",
+          "required": false,
+          "present": true
+        },
+        {
+          "item": "value_check",
+          "label": "Sampled values pass the class checks",
+          "kind": "detection",
+          "required": false,
+          "present": true
+        }
       ],
       "review_status": "EVIDENCE GAP FLAG"
     },
@@ -221,12 +636,49 @@
       "column": "contact_email",
       "cls": "EMAIL",
       "confidence": 1.0,
-      "evidence": "name hint 'email'; 50/50 sampled values passed pattern+validator",
+      "evidence": "name hint 'email'; 50/50 sampled values passed RFC 5322-style email syntax",
       "purpose": "Service communication",
       "retention": "Account closure + 1 year",
       "owner": "Platform team",
       "gaps": [],
-      "review_status": "Candidate - metadata linked"
+      "checklist": [
+        {
+          "item": "purpose",
+          "label": "Declared purpose",
+          "kind": "metadata",
+          "required": true,
+          "present": true
+        },
+        {
+          "item": "retention",
+          "label": "Retention period",
+          "kind": "metadata",
+          "required": true,
+          "present": true
+        },
+        {
+          "item": "owner",
+          "label": "Data owner",
+          "kind": "metadata",
+          "required": true,
+          "present": true
+        },
+        {
+          "item": "name_hint",
+          "label": "Column name matches a known hint",
+          "kind": "detection",
+          "required": false,
+          "present": true
+        },
+        {
+          "item": "value_check",
+          "label": "Sampled values pass the class checks",
+          "kind": "detection",
+          "required": false,
+          "present": true
+        }
+      ],
+      "review_status": "Candidate: checklist complete"
     }
   ]
 }

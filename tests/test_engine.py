@@ -30,3 +30,22 @@ def test_valid_aadhaar_found_without_name_hint():
 def test_name_hint_alone_is_not_enough():
     f = score_column(col("file_name", ["report.pdf", "data.csv"]), RULES, SCORING)
     assert f.cls == "NONE"
+
+def test_negative_hint_rules_out_a_date_of_birth():
+    f = score_column(col("created_at", ["1990-05-17"] * 5), RULES, SCORING)
+    assert f.cls == "NONE" and "negative hint 'created'" in f.evidence
+
+
+def test_negative_hint_rules_out_a_phone_number():
+    f = score_column(col("emp_code", ["9876543210"] * 5), RULES, SCORING)
+    assert f.cls == "NONE"
+
+
+def test_real_birth_date_column_is_still_found():
+    f = score_column(col("birth_date", ["1990-05-17"] * 5), RULES, SCORING)
+    assert f.cls == "DOB"
+
+
+def test_evidence_names_the_checks_that_ran():
+    f = score_column(col("mobile", ["9876543210"] * 5), RULES, SCORING)
+    assert "10-digit mobile pattern" in f.evidence

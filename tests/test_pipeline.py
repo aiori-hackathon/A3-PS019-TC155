@@ -3,9 +3,11 @@ import sqlite3
 import pytest
 
 from privexis.engine import load_config
+from privexis.linker import load_checklist
 from privexis.pipeline import metadata_template_csv, parse_metadata, run_pipeline
 
-RULES, SCORING = load_config()   # run pytest from the repo root so this path resolves
+RULES, SCORING = load_config()   # run pytest from the repo root so these paths resolve
+CHECKLIST = load_checklist()
 
 
 def test_parse_metadata_csv():
@@ -37,7 +39,7 @@ def test_template_is_valid_metadata():
 def test_pipeline_finds_renamed_columns_and_keeps_samples(tmp_path):
     p = tmp_path / "t.csv"
     p.write_text("Email ID,notes\na@x.com,hello\nb@y.org,ok\n", encoding="utf-8")
-    res = run_pipeline([p], RULES, SCORING, {})
+    res = run_pipeline([p], RULES, SCORING, {}, CHECKLIST)
     assert [r.cls for r in res.rows] == ["EMAIL"]
     assert "NO_METADATA_ENTRY" in res.rows[0].gaps
     assert res.samples[("t.csv", "-", "Email ID")] == ["a@x.com", "b@y.org"]
@@ -47,7 +49,7 @@ def test_pipeline_links_uploaded_metadata(tmp_path):
     p = tmp_path / "t.csv"
     p.write_text("email\na@x.com\n", encoding="utf-8")
     meta = {"t.csv:-:email": {"purpose": "p", "retention": "r", "owner": "o"}}
-    assert run_pipeline([p], RULES, SCORING, meta).rows[0].gaps == []
+    assert run_pipeline([p], RULES, SCORING, meta, CHECKLIST).rows[0].gaps == []
 
 
 def test_pipeline_reads_sqlite(tmp_path):
@@ -57,5 +59,20 @@ def test_pipeline_reads_sqlite(tmp_path):
     con.executemany("INSERT INTO people VALUES (?)", [("9876543210",), ("8123456789",)])
     con.commit()
     con.close()
-    res = run_pipeline([db], RULES, SCORING, {})
+    res = run_pipeline([db], RULES, SCORING, {}, CHECKLIST)
     assert res.rows[0].cls == "PHONE" and res.rows[0].table == "people"
+
+
+def test_partial_evidence_goes_to_the_review_list(tmp_path):
+    p = tmp_path / "t.csv"
+    rows = ["a@x.com"] * 3 + ["call back"] * 7          # 30% emails: below threshold, above floor
+    p.write_text("notes\n" + "\n".join(rows) + "\n", encoding="utf-8")
+    res = run_pipeline([p], RULES, SCORING, {}, CHECKLIST)
+    assert res.rows == []
+    assert [f.column for f in res.review] == ["notes"]
+
+
+def test_columns_with_no_evidence_are_not_listed_for_review(tmp_path):
+    p = tmp_path / "t.csv"
+    p.write_text("city\nPune\nJaipur\n", encoding="utf-8")
+    assert run_pipeline([p], RULES, SCORING, {}, CHECKLIST).review == []

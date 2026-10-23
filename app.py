@@ -1,4 +1,8 @@
+"""Privexis web app.  Run it with:   streamlit run app.py
 
+The page layout and styling live in src/privexis/ui.py. The scanning logic is the same
+pipeline the command line uses (src/privexis/pipeline.py).
+"""
 import sys
 import tempfile
 from pathlib import Path
@@ -11,7 +15,7 @@ import streamlit as st
 from privexis import ui
 from privexis.engine import load_config
 from privexis.evaluator import evaluate, load_labels
-from privexis.linker import load_metadata
+from privexis.linker import load_checklist, load_metadata
 from privexis.pipeline import (find_sources, metadata_template_csv, parse_metadata,
                                run_pipeline)
 from privexis.report import DISCLAIMER, write_gap_report, write_inventory
@@ -28,12 +32,15 @@ def html(markup: str) -> None:
     st.markdown(markup, unsafe_allow_html=True)
 
 
+checklist = load_checklist(CONFIG / "checklist.yaml")
+
+
 @st.cache_data(show_spinner=False)
 def run_demo(threshold: float, k: int):
     rules, scoring = load_config(CONFIG / "rules.yaml")
     scoring = {**scoring, "threshold": threshold}
     metadata = load_metadata(CONFIG / "metadata.yaml")
-    result = run_pipeline(find_sources(DEMO_DATA), rules, scoring, metadata, k)
+    result = run_pipeline(find_sources(DEMO_DATA), rules, scoring, metadata, checklist, k)
     metrics = evaluate(result.findings, load_labels(DEMO_DATA / "labels.csv"))
     return result, metrics
 
@@ -85,7 +92,7 @@ else:
                 p = Path(tmp) / Path(f.name).name      # .name drops any folder part of the file name
                 p.write_bytes(f.getvalue())
                 paths.append(p)
-            result = run_pipeline(paths, base_rules, scoring, metadata, k)
+            result = run_pipeline(paths, base_rules, scoring, metadata, checklist, k)
     except UnicodeDecodeError:
         st.error("One of the files is not UTF-8 text. In Excel, use Save As > CSV UTF-8, then upload it again.")
         st.stop()
@@ -102,7 +109,8 @@ html(ui.summary_html(len(findings), len(rows), n_gaps))
 if rows:
     html(ui.heading_html("Evidence tags",
                          "One tag per column that looks like personal data. The bar shows the "
-                         "confidence score, and the yellow mark is the threshold."))
+                         "confidence score, and the yellow mark is the threshold. "
+                         "Each tag is checked against the evidence checklist."))
     c1, c2 = st.columns([2, 3])
     with c1:
         view = st.radio("Show", ["All fields", "Only fields with gaps"], horizontal=True)
@@ -119,9 +127,15 @@ if rows:
     html(ui.tags_grid_html(cards) if cards else
          '<p class="px-sub">No fields match this filter.</p>')
 
-unflagged = [f for f in findings if f.cls == "NONE"]
+if result.review:
+    html(ui.heading_html("Needs a closer look",
+                         "Not flagged, but some evidence points to personal data. "
+                         "Listed so a person can decide."))
+    html(ui.review_html(result.review))
+
+unflagged = [f for f in findings if f.cls == "NONE" and f not in result.review]
 if unflagged:
-    with st.expander(f"{len(unflagged)} columns were not flagged"):
+    with st.expander(f"{len(unflagged)} other columns were not flagged"):
         html(ui.unflagged_html(unflagged))
 
 if result.orphans:
@@ -152,7 +166,7 @@ html(ui.split_html(DISCLAIMER))
 html(ui.heading_html("Take the results with you"))
 with tempfile.TemporaryDirectory() as out:
     write_inventory(rows, out)
-    write_gap_report(rows, result.orphans, out)
+    write_gap_report(rows, result.orphans, out, result.review)
     files_out = {n: (Path(out) / n).read_bytes()
                  for n in ("inventory.csv", "inventory.json", "gap_report.md")}
 cols = st.columns(3)

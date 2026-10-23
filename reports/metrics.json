@@ -18,11 +18,11 @@
     },
     "PHONE": {
       "tp": 3,
-      "fp": 1,
+      "fp": 0,
       "fn": 0,
-      "precision": 0.75,
+      "precision": 1.0,
       "recall": 1.0,
-      "f1": 0.857
+      "f1": 1.0
     },
     "GOVT_ID": {
       "tp": 2,
@@ -34,11 +34,11 @@
     },
     "DOB": {
       "tp": 2,
-      "fp": 1,
+      "fp": 0,
       "fn": 0,
-      "precision": 0.667,
+      "precision": 1.0,
       "recall": 1.0,
-      "f1": 0.8
+      "f1": 1.0
     }
   },
   "errors": [
@@ -50,24 +50,6 @@
       ],
       "EMAIL",
       "NONE"
-    ],
-    [
-      [
-        "hard_cases.csv",
-        "-",
-        "created_at"
-      ],
-      "NONE",
-      "DOB"
-    ],
-    [
-      [
-        "hard_cases.csv",
-        "-",
-        "emp_code"
-      ],
-      "NONE",
-      "PHONE"
     ],
     [
       [

@@ -22,6 +22,7 @@ class PipelineResult:
     findings: list                 # every scanned column, including class "NONE"
     rows: list                     # candidate personal-data fields + linked metadata
     orphans: list                  # declared metadata that matches no candidate field
+    review: list = field(default_factory=list)    # not flagged, but some evidence: a person should look
     samples: dict = field(default_factory=dict)   # (source, table, column) -> sampled values
 
 
@@ -31,16 +32,23 @@ def find_sources(data_dir) -> list:
             if p.suffix.lower() in SOURCE_SUFFIXES and p.name != "labels.csv"]
 
 
-def run_pipeline(paths, rules, scoring, metadata, k: int = 50) -> PipelineResult:
+def needs_review(findings, scoring) -> list:
+    """Columns the scanner did NOT flag but that scored between review_floor and the threshold."""
+    floor = scoring.get("review_floor", 0.1)
+    return [f for f in findings if f.cls == "NONE" and f.confidence >= floor]
+
+
+def run_pipeline(paths, rules, scoring, metadata, checklist, k: int = 50) -> PipelineResult:
     findings, samples = [], {}
     for path in paths:
         for s in sample_path(path, k=k):
             samples[(s.source, s.table, s.column)] = s.values
             findings.append(score_column(s, rules, scoring))
-    return PipelineResult(findings,
-                          link(findings, metadata),
-                          orphaned_metadata(findings, metadata),
-                          samples)
+    return PipelineResult(findings=findings,
+                          rows=link(findings, metadata, checklist),
+                          orphans=orphaned_metadata(findings, metadata),
+                          review=needs_review(findings, scoring),
+                          samples=samples)
 
 
 def parse_metadata(raw: bytes, filename: str) -> dict:

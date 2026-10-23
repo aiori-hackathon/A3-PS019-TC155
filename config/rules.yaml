@@ -1,29 +1,41 @@
 # Detection rules. Edit this file to change what the scanner looks for.
 # confidence = name_weight * (name hint matched?) + value_weight * (fraction of sampled values that pass)
+#
+#   name_hints      column-name words that point to the class (whole words only)
+#   negative_hints  column-name words that rule the class OUT (for example 'created' is not a birth date)
+#   value_patterns  cheap regex shape check on sampled values
+#   validator       strict check, by name (see VALIDATORS in src/privexis/engine.py)
+#   check           plain-English name of the checks, shown in the evidence text
 scoring:
   name_weight: 0.4
   value_weight: 0.6
   threshold: 0.5        # confidence needed to be flagged as a candidate
+  review_floor: 0.1     # not flagged, but at least this much evidence -> listed under "needs review"
 
 classes:
   NAME:
     name_hints: [name, surname, fname, lname]
+    check: alphabetic pattern of two or more words
     value_patterns:
       - '^[A-Za-z][A-Za-z.-]*(\s+[A-Za-z][A-Za-z.-]*)+$'   # two or more words
 
   EMAIL:
     name_hints: [email, e_mail, mail]
+    check: RFC 5322-style email syntax
     value_patterns:
       - '^[^@\s]+@[^@\s]+\.[^@\s]+$'                       # cheap shape check
     validator: email                                        # strict check
 
   PHONE:
     name_hints: [phone, mobile, mob, tel, telephone, contact, cell, ph]
+    negative_hints: [emp, employee, code, ref, order, invoice, pin, zip]
+    check: 10-digit mobile pattern (optional +91)
     value_patterns:
       - '^(\+91[\s-]?|0)?[6-9]\d{9}$'
 
   GOVT_ID:
     name_hints: [aadhaar, aadhar, uid, pan, national_id, govt_id, gov_id, tax_id]
+    check: Verhoeff checksum (Aadhaar-style) or PAN format
     value_patterns:
       - '^\d{4}[\s-]?\d{4}[\s-]?\d{4}$'                    # Aadhaar shape
       - '^[A-Za-z]{5}\d{4}[A-Za-z]$'                       # PAN shape
@@ -31,6 +43,8 @@ classes:
 
   DOB:
     name_hints: [dob, birth, birthdate, birth_date, date_of_birth, born]
+    negative_hints: [created, updated, modified, expiry, expires, issued, timestamp, joined]
+    check: ISO or DD/MM/YYYY date between 1900 and today
     value_patterns:
       - '^\d{4}-\d{2}-\d{2}$'
       - '^\d{2}/\d{2}/\d{4}$'

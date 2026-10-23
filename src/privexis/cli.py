@@ -5,7 +5,7 @@ from pathlib import Path
 
 from privexis.engine import load_config
 from privexis.evaluator import evaluate, load_labels
-from privexis.linker import load_metadata
+from privexis.linker import load_checklist, load_metadata
 from privexis.pipeline import find_sources, run_pipeline
 from privexis.report import write_gap_report, write_inventory
 
@@ -20,7 +20,7 @@ def build_parser() -> argparse.ArgumentParser:
     scan = sub.add_parser("scan", help="scan, link metadata, report gaps, evaluate")
     scan.add_argument("--data", default="data", help="folder with CSV/SQLite files")
     scan.add_argument("--config", default="config",
-                      help="folder with rules.yaml and metadata.yaml")
+                      help="folder with rules.yaml, checklist.yaml and metadata.yaml")
     scan.add_argument("--labels", default="data/labels.csv",
                       help="hand-labelled ground truth (evaluation is skipped if absent)")
     scan.add_argument("--out", default="reports", help="output folder")
@@ -33,16 +33,17 @@ def run_scan(args) -> int:
     config = Path(args.config)
     rules, scoring = load_config(config / "rules.yaml")
     metadata = load_metadata(config / "metadata.yaml")
+    checklist = load_checklist(config / "checklist.yaml")
 
-    result = run_pipeline(find_sources(args.data), rules, scoring, metadata,
+    result = run_pipeline(find_sources(args.data), rules, scoring, metadata, checklist,
                           k=args.sample_size)
     findings, rows, orphans = result.findings, result.rows, result.orphans
     write_inventory(rows, args.out)
-    write_gap_report(rows, orphans, args.out)
+    write_gap_report(rows, orphans, args.out, result.review)
 
     gaps = [r for r in rows if r.gaps]
     print(f"Scanned {len(findings)} columns -> {len(rows)} candidate personal-data "
-          f"fields, {len(gaps)} with metadata gaps")
+          f"fields, {len(gaps)} with evidence gaps, {len(result.review)} need review")
 
     labels_path = Path(args.labels)
     if labels_path.exists():

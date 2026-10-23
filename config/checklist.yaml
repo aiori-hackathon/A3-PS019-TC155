@@ -1,0 +1,36 @@
+# Evidence checklist: the evidence a reviewer expects for every candidate personal-data field.
+# Edit this file to change what counts as an evidence gap. No code change is needed.
+#
+#   kind: metadata   -> declared by a data steward in config/metadata.yaml
+#   kind: detection  -> collected by the scanner itself while scanning
+#
+# A REQUIRED item that is missing is flagged as an evidence gap (MISSING_<ITEM>).
+# An ADVISORY item that is missing is only shown to the reviewer, it is not a gap.
+
+items:
+  purpose:
+    kind: metadata
+    label: Declared purpose
+  retention:
+    kind: metadata
+    label: Retention period
+  owner:
+    kind: metadata
+    label: Data owner
+  name_hint:
+    kind: detection
+    label: Column name matches a known hint
+  value_check:
+    kind: detection
+    label: Sampled values pass the class checks
+    min_pass_rate: 0.8        # share of sampled values that must pass
+
+required: [purpose, retention, owner]
+advisory: [name_hint, value_check]
+
+# Optional per-class changes. A class listed here replaces the lists above.
+overrides:
+  GOVT_ID:
+    # For government IDs the strict validator (Verhoeff / PAN format) must also pass.
+    required: [purpose, retention, owner, value_check]
+    advisory: [name_hint]

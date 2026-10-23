@@ -5,7 +5,8 @@ from privexis import ui
 
 def row(column="email", cls="EMAIL", gaps=(), **kw):
     base = dict(source="a.csv", table="-", column=column, cls=cls, confidence=1.0,
-                purpose="", retention="", owner="", gaps=list(gaps), evidence="e")
+                purpose="", retention="", owner="", gaps=list(gaps), evidence="e",
+                checklist=[])
     base.update(kw)
     return SimpleNamespace(**base)
 
@@ -41,9 +42,27 @@ def test_gap_chips_do_not_repeat_when_undocumented():
     assert "Not documented" in out
 
 
-def test_fully_documented_card():
+def test_complete_card():
     out = ui.tag_html(row(purpose="p", retention="r", owner="o"), [], 0.5)
-    assert "Documented" in out and "px-chip gap" not in out
+    assert "Checklist complete" in out and "px-chip gap" not in out
+
+
+def test_detection_gap_is_still_shown_next_to_not_documented():
+    out = ui.tag_html(row(gaps=["NO_METADATA_ENTRY", "MISSING_PURPOSE", "MISSING_VALUE_CHECK"]),
+                      [], 0.5)
+    assert out.count("px-chip gap") == 2 and "Values fail the check" in out
+
+
+def test_detection_evidence_is_listed_on_the_card():
+    checks = [{"item": "name_hint", "label": "Column name matches a known hint",
+               "kind": "detection", "required": False, "present": False}]
+    out = ui.tag_html(row(checklist=checks), [], 0.5)
+    assert "No: Column name matches a known hint (advisory)" in out
+
+
+def test_review_list_is_escaped():
+    f = SimpleNamespace(column="<b>x</b>", source="s.csv", evidence="e")
+    assert "<b>" not in ui.review_html([f])
 
 
 def test_summary_handles_empty_scan():
