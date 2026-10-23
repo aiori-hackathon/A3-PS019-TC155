@@ -63,10 +63,11 @@ Each box is one small file with one job. That is deliberate: you can explain any
 | `sampler.py` | Takes at most 50 values per column. | **Reservoir sampling**: you get a fair random sample in one pass without knowing the row count. A fixed seed (42) makes it **reproducible**. Real tables can have millions of rows; 50 values are enough to tell an email column from a city column. |
 | `engine.py` | Scores every column against every class and keeps the best. | **Evidence fusion** (section 5). It also applies *negative hints* (a column called `created_at` can never be a birth date). |
 | `linker.py` | Matches each detected field with its declared metadata and checks it against the **evidence checklist**. | Gaps are *facts* ("retention is absent"), not *verdicts* ("you are non-compliant"). What counts as a gap is set in `checklist.yaml`, not in code. |
-| `pipeline.py` | Runs sample -> score -> link in one function, builds the "needs review" list, and reads uploaded metadata files. | The command line and the web app both call it, so they can never disagree. This is why adding the web app took so little code. |
+| `pipeline.py` | Runs sample -> score -> link in one function, builds the "needs review" list, reads uploaded metadata files, and scores a labelled folder (`scan_labelled`). | The command line and the web app both call it, so they can never disagree. This is why adding the web app took so little code. |
 | `report.py` | Writes the inventory and the gap report (with the checklist table). Stamps a disclaimer in each. | This is how "technical evidence vs legal interpretation" is shown. |
 | `evaluator.py` | Compares the scanner's answers with the answer key. | Precision and recall (section 6). |
 | `cli.py` | Runs everything from one command. | `privexis scan` |
+| `demos.py` | The "Try to fool it" cases: synthetic columns whose name and values disagree, plus a column-name-only comparison. | The comparison is deliberately simple: it stands for any tool that never opens the values. It uses our own hint words, so it is a fair stand-in, not a rival product. |
 | `ui.py` | The web app's HTML and CSS as plain functions. | It does not import Streamlit, so it can be tested. Everything from an uploaded file is escaped, and sample values are masked. |
 | `__main__.py` | 2 lines that let you also run `python -m privexis scan`. | Same command, no install needed. |
 | `__init__.py` | Empty. Tells Python this folder is a package. | |
@@ -85,18 +86,19 @@ Each box is one small file with one job. That is deliberate: you can explain any
 |---|---|
 | `onboarding.csv`, `temp_dump.csv`, `hard_cases.csv`, `users.sqlite` | The synthetic data being scanned. |
 | `labels.csv` | The **answer key**: the true class of every column, **written by hand** (not generated). See `docs/LABELLING.md`. Without it we could not compute accuracy. |
+| `holdout/` | A **second** labelled set (`hr_export.csv`, `crm_leads.csv`, `labels.csv`). The rules were never tuned on it, so its scores are the more honest ones. These files are kept as they are and are not made by `generate_data.py`. |
 
 ### `scripts/generate_data.py`
 
 Creates the four data files. Seeded, so it produces identical files every time, and anyone can rebuild the data. It deliberately does **not** write `labels.csv`: the answer key is labelled by hand, so it does not come from the same code that made the data. A test (`tests/test_labels.py`) fails if the labels and the data files ever stop matching.
 
-### `tests/` (57 tests)
+### `tests/` (74 tests)
 
 Small checks that prove each part works (`pytest -q`). When you change a rule, they tell you immediately if something else broke.
 
 ### `reports/` (the outputs, committed as evidence)
 
-`inventory.csv` / `inventory.json` (every candidate field with its evidence and gaps), `gap_report.md` (readable summary), `metrics.json` (precision and recall).
+`inventory.csv` / `inventory.json` (every candidate field with its evidence and gaps), `gap_report.md` (readable summary), `metrics.json` and `metrics_holdout.json` (precision and recall on the two labelled sets).
 
 ### Root files
 
@@ -145,7 +147,11 @@ Why these choices matter for a privacy tool:
 - **Escaping.** A column called `<script>...` would be dangerous if pasted into a web page raw. `ui.py` escapes every piece of uploaded text, and a test checks it.
 - **Limits.** Files over 25 MB are refused. Bad encodings and corrupt databases show a plain error message instead of crashing.
 - **Metadata upload.** You can upload a CSV with `source, table, column, purpose, retention, owner`, or a YAML file like `config/metadata.yaml`. The app offers a template to download.
-- **Accuracy only for the demo.** Precision and recall need an answer key. Uploaded files do not have one, so the page says so instead of inventing a number.
+- **Accuracy only for the built-in sets.** Precision and recall need an answer key. Uploaded files do not have one, so the Accuracy tab always shows the two built-in sets and says so, instead of inventing a number for your upload.
+
+The page has six tabs: **Evidence**, **Gaps**, **Accuracy**, **Try to fool it**, **Rules** and **About**. The Rules tab reads `config/rules.yaml` and `config/checklist.yaml` live, so what it shows is what the scanner uses.
+
+**Try to fool it** is the quickest way to see why we check values and not only column names. Pick a trap, for example a column called `ref_no` that holds valid Aadhaar numbers. A tool that only reads names says "not personal data". Privexis runs the Verhoeff checksum on the values and flags it as a government ID. There is also a trap the other way round: a column called `aadhaar` whose numbers fail the checksum is *not* flagged. You can type your own made-up column and values too.
 
 The page itself is built from `ui.py` (looks) and `app.py` (what happens). Each flagged column becomes an **evidence tag**: class, a confidence bar with the threshold marked on it, masked examples, declared purpose / retention / owner, the detection checks that passed, and any gaps. A separate list, **Needs a closer look**, shows columns that were *not* flagged but had some evidence.
 
@@ -197,7 +203,7 @@ Detection finds the field. The checklist says what evidence a reviewer expects f
 - **Precision**: of the columns the scanner flagged as EMAIL, how many really are? (punishes false alarms)
 - **Recall**: of the real EMAIL columns, how many did it find? (punishes misses)
 
-Results on the 22 hand-labelled columns, before and after we added negative hints to `rules.yaml`:
+There are two labelled sets. Start with the **main set** (22 columns), before and after we added negative hints to `rules.yaml`:
 
 | Class | Precision before | Precision after | Recall |
 |---|---|---|---|
@@ -215,6 +221,18 @@ Four errors were **planted on purpose** in `hard_cases.csv`. Two were then fixed
 | `emp_code` | wrongly flagged as PHONE (10 digits starting 6-9) | fixed by the negative hint `emp` |
 | `comments` | EMAIL missed: only 25% of values are emails, so the score is below the threshold | **remains**; the column now appears on the *needs review* list |
 | `holder` | NAME missed: single-word names, and our NAME pattern wants two or more words | **remains** |
+
+Then the **fresh set** (21 columns in `data/holdout/`), which the rules never saw and which was scored before any rule was changed:
+
+| Class | Precision | Recall |
+|---|---|---|
+| NAME | 0.5 | 1.0 |
+| EMAIL | 1.0 | 1.0 |
+| PHONE | 0.667 | 1.0 |
+| GOVT_ID | 1.0 | 0.75 |
+| DOB | 0.333 | 0.5 |
+
+It is much lower, and that is the point of having it. The errors fall into a few families: free text such as `notes` or `company_name` passes the "two or more words" name pattern; dates such as `date_of_joining` and `last_contacted` look like birth dates; `ticket_number` looks like a phone number; a spelled-out date (`5 October 1976`) and a passport number are not supported formats. We left the rules alone on purpose. If we tuned them to this set it would stop being a fresh set. To measure an improvement, label a third set first.
 
 **Be upfront about this:** we wrote the negative hints *after* seeing these errors, on the same 22 columns. So the "after" column is **not** an unbiased estimate of accuracy on new data. It shows that errors can be fixed through configuration alone. The "before" column is the more honest first look. A scanner that scored 100% on easy data would prove nothing. The unit measured is the **column**, not each individual value.
 
@@ -241,7 +259,8 @@ Undo your experiments afterwards (`git checkout config`) so the demo still shows
 - `05/06/1990` is ambiguous between DD/MM and MM/DD.
 - Email validation is a practical subset of RFC 5322, not the full grammar.
 - Columns where only a small share of values are PII fall below the threshold.
-- Synthetic data only; thresholds were not tuned on real data. Negative hints were added after seeing errors on the same test set, so the improved precision is not an independent measurement.
-- The answer key was labelled by the team that also designed the data, so it is not an independent labelling.
+- Synthetic data only; thresholds were not tuned on real data. Negative hints were added after seeing errors on the main set, so its improved precision is not an independent measurement. The fresh set is the independent one, and it is weaker (section 6).
+- Free text of two or more words can be flagged as NAME; spelled-out dates and passport numbers are not recognised.
+- The answer keys were labelled by the team that also designed the data, so they are not independent labellings.
 - Name detection uses a pattern, not a language model. Our proposal mentions spaCy NER as a possible extension; it is **future work** and is not in the code.
 - Accuracy can only be measured where an answer key exists, so uploads are scanned but not scored.

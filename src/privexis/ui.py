@@ -261,6 +261,152 @@ def split_html(disclaimer: str) -> str:
     )
 
 
+# --------------------------------------------------------------------------- try to fool it
+def _cls_label(cls: str) -> str:
+    return "Not personal data" if cls == "NONE" else CLASS_META.get(cls, (cls,))[0]
+
+
+def _verdict(who: str, cls: str, truth, extra: str = "") -> str:
+    color = CLASS_META.get(cls, ("", "#E3E8DD"))[1]
+    mark = ""
+    if truth is not None:
+        mark = ('<span class="px-mark right">Right</span>' if cls == truth
+                else '<span class="px-mark wrong">Wrong</span>')
+    return (f'<div class="px-verdict" style="--c:{color}"><span class="px-who">{_e(who)}</span>'
+            f'<b>{_e(_cls_label(cls))}</b>{mark}'
+            f'{f"<small>{_e(extra)}</small>" if extra else ""}</div>')
+
+
+def probe_html(column, values, finding, naive: str, truth, threshold: float,
+               story: str = "") -> str:
+    """One 'try to fool it' result: the column, the two verdicts, and the reasons."""
+    conf = max(0.0, min(float(finding.confidence), 1.0))
+    thr = max(0.0, min(float(threshold), 1.0))
+    shown = "".join(f"<code>{_e(mask_value(v))}</code>" for v in values[:3])
+    story_html = f'<p class="px-sub">{_e(story)}</p>' if story else ""
+    expected = (f'<p class="px-fine">A careful human would say: <b>{_e(_cls_label(truth))}</b>.</p>'
+                if truth is not None else "")
+    return (
+        '<section class="px-probe">'
+        f'<h3 class="px-colhead">{_e(column)}</h3>{story_html}'
+        f'<div class="px-examples" aria-label="Masked example values">{shown}</div>'
+        '<div class="px-versus">'
+        f'{_verdict("A tool that only reads column names says", naive, truth)}'
+        f'{_verdict("Privexis says", finding.cls, truth, f"confidence {conf:.2f}")}'
+        '</div>'
+        f'<div class="px-meter" role="img" aria-label="Confidence {conf:.2f}, threshold {thr:.2f}">'
+        f'<i style="--w:{conf * 100:.1f}%"></i><b style="--t:{thr * 100:.1f}%"></b></div>'
+        f'<p class="px-why">{_e(finding.evidence)}</p>{expected}'
+        '</section>')
+
+
+# --------------------------------------------------------------------------- gaps tab
+def gap_tally_html(rows) -> str:
+    counts = {}
+    for r in rows:
+        for g in r.gaps:
+            counts[g] = counts.get(g, 0) + 1
+    if not counts:
+        return '<p class="px-sub">No evidence gaps.</p>'
+    chips = "".join(f'<span class="px-chip gap">{_e(GAP_LABELS.get(g, g))}: {n}</span>'
+                    for g, n in sorted(counts.items(), key=lambda kv: -kv[1]))
+    return f'<div class="px-chips">{chips}</div>'
+
+
+def matrix_html(rows, checklist: dict) -> str:
+    """Checklist matrix: one row per candidate field, one column per checklist item."""
+    items = list(checklist["items"])
+    head = "".join(f"<th>{_e(checklist['items'][i].get('label', i))}</th>" for i in items)
+    body = []
+    for r in rows:
+        state = {c["item"]: c for c in (getattr(r, "checklist", None) or [])}
+        cells = []
+        for i in items:
+            c = state.get(i)
+            if c is None:
+                cells.append('<td class="na">n/a</td>')
+            elif c["present"]:
+                cells.append('<td class="yes">Yes</td>')
+            elif c["required"]:
+                cells.append('<td class="miss">NO</td>')
+            else:
+                cells.append('<td class="adv">no</td>')
+        cls = _cls_label(r.cls)
+        body.append(f'<tr><th scope="row"><code>{_e(r.column)}</code>'
+                    f'<span>{_where(r.source, r.table)}</span></th><td>{_e(cls)}</td>'
+                    f'{"".join(cells)}</tr>')
+    return ('<div class="px-tablewrap"><table class="px-table"><thead><tr><th>Field</th>'
+            f'<th>Class</th>{head}</tr></thead><tbody>{"".join(body)}</tbody></table></div>'
+            '<p class="px-fine"><b>NO</b> = a required item is missing (an evidence gap). '
+            '<b>no</b> = an advisory item is missing (shown, not counted as a gap).</p>')
+
+
+# --------------------------------------------------------------------------- rules tab
+def rules_html(rules, scoring: dict) -> str:
+    def chips(words):
+        return ("".join(f"<code>{_e(w)}</code>" for w in words)
+                or '<span class="px-none">none</span>')
+
+    cards = []
+    for rule in rules:
+        label, color = CLASS_META.get(rule.cls, (rule.cls, "#DDDDDD"))
+        validator = getattr(rule.validator, "__name__", None)
+        pats = chips([p.pattern for p in rule.patterns])
+        cards.append(
+            f'<article class="px-card px-rule" style="--c:{color}">'
+            f'<div class="px-cardtop"><span class="px-class">{_e(label)}</span></div>'
+            f'<dl class="px-meta"><dt>Name hints</dt><dd class="px-examples">{chips(rule.name_hints)}</dd>'
+            f'<dt>Rules it out</dt><dd class="px-examples">{chips(rule.negative_hints)}</dd>'
+            f'<dt>Value check</dt><dd>{_e(rule.check)}</dd>'
+            f'<dt>Patterns</dt><dd class="px-examples">{pats}</dd>'
+            f'<dt>Validator</dt><dd>{_e(validator) if validator else "none"}</dd></dl>'
+            '</article>')
+    formula = (f'confidence = {scoring["name_weight"]} x (column name matches a hint) '
+               f'+ {scoring["value_weight"]} x (share of sampled values that pass). '
+               f'A column is flagged at {scoring["threshold"]} or above.')
+    return (f'<p class="px-formula">{_e(formula)}</p><div class="px-grid">{"".join(cards)}</div>')
+
+
+def checklist_html(checklist: dict) -> str:
+    required, advisory = set(checklist["required"]), set(checklist["advisory"])
+    rows = []
+    for name, spec in checklist["items"].items():
+        source = ("Declared by a data steward (config/metadata.yaml)"
+                  if spec["kind"] == "metadata" else "Collected by the scanner while it scans")
+        level = "Required" if name in required else "Advisory" if name in advisory else "Not used"
+        rows.append(f'<tr><th scope="row">{_e(spec.get("label", name))}</th>'
+                    f'<td>{_e(source)}</td><td>{level}</td></tr>')
+    over = "".join(
+        f'<li><b>{_e(_cls_label(cls))}</b>: required = {_e(", ".join(o.get("required", [])))}</li>'
+        for cls, o in checklist["overrides"].items())
+    over_html = (f'<p class="px-fine">Per-class changes:</p><ul class="px-fine">{over}</ul>'
+                 if over else "")
+    return ('<div class="px-tablewrap"><table class="px-table"><thead><tr><th>Checklist item</th>'
+            '<th>Where the evidence comes from</th><th>Default</th></tr></thead>'
+            f'<tbody>{"".join(rows)}</tbody></table></div>{over_html}')
+
+
+# --------------------------------------------------------------------------- about tab
+REQUIREMENTS = [
+    ("Support CSV and one SQL database", "CSV files and SQLite, opened read-only"),
+    ("Identify 5 predefined data classes", "Name, email, phone, government ID, date of birth"),
+    ("Detect candidates with configurable rules", "config/rules.yaml (see the Rules tab)"),
+    ("Link fields to purpose and retention", "config/metadata.yaml, or an uploaded metadata file"),
+    ("Configurable evidence checklist", "config/checklist.yaml (see the Rules tab)"),
+    ("Flag missing purpose or retention", "Evidence gaps (see the Gaps tab)"),
+    ("Small manually labelled test set", "data/labels.csv and data/holdout/labels.csv"),
+    ("Per-class precision and recall", "Accuracy tab, on two separate labelled sets"),
+    ("Evidence kept apart from legal interpretation", "Every report says so; status is only 'Candidate'"),
+    ("No lawful-basis decision, no data-flow inference", "Nothing in the code attempts either"),
+]
+
+
+def about_html() -> str:
+    rows = "".join(f'<tr><th scope="row">{_e(a)}</th><td>{_e(b)}</td></tr>' for a, b in REQUIREMENTS)
+    return ('<div class="px-tablewrap"><table class="px-table"><thead><tr><th>PS-019 asks for</th>'
+            f'<th>Where it is in Privexis</th></tr></thead><tbody>{rows}</tbody></table></div>')
+
+
 # --------------------------------------------------------------------------- CSS
 # "@@" is replaced with ".stApp " so these rules beat Streamlit's own element styles.
 _CSS = """
@@ -391,6 +537,39 @@ _CSS = """
 @@.px-split h3{font:800 1.3rem/1.1 var(--display);margin:0 0 10px;padding:0;}
 @@.px-split ul{margin:0;padding-left:1.1rem;display:grid;gap:6px;font:400 .98rem/1.4 var(--body);}
 @@p.px-fine{font:400 .85rem/1.5 var(--body);color:var(--mute);max-width:80ch;margin:10px 0 0;}
+
+/* ---- tabs ---- */
+@@ [data-baseweb="tab-list"]{gap:6px;border-bottom:2px solid var(--ink);flex-wrap:wrap;}
+@@ button[role="tab"]{font:700 1rem/1.2 var(--display);color:var(--ink);padding:10px 16px;border-radius:10px 10px 0 0;}
+@@ button[role="tab"][aria-selected="true"]{background:var(--hl);}
+@@ [data-baseweb="tab-highlight"]{background:var(--ink);height:4px;}
+@@ [data-baseweb="tab-border"]{display:none;}
+
+/* ---- try to fool it ---- */
+@@.px-probe{background:var(--panel);border:2px solid var(--ink);border-radius:12px;padding:18px 20px;display:flex;flex-direction:column;gap:12px;margin:12px 0;}
+@@.px-versus{display:grid;grid-template-columns:1fr;gap:12px;}
+@media (min-width:640px){@@.px-versus{grid-template-columns:1fr 1fr;}}
+@@.px-verdict{border:2px solid var(--ink);border-radius:10px;padding:12px 14px;display:flex;flex-direction:column;gap:4px;background:var(--c,var(--soft));}
+@@.px-who{font:500 .85rem/1.2 var(--body);}
+@@.px-verdict b{font:800 1.4rem/1.1 var(--display);letter-spacing:-.01em;}
+@@.px-verdict small{font:500 .82rem/1.2 var(--mono);}
+@@.px-mark{align-self:flex-start;font:700 .78rem/1.2 var(--body);padding:3px 9px;border:2px solid var(--ink);border-radius:999px;background:var(--panel);}
+@@.px-mark.wrong{background:var(--ink);color:#fff;}
+
+/* ---- tables, rules ---- */
+@@.px-tablewrap{overflow-x:auto;border:2px solid var(--ink);border-radius:10px;background:var(--panel);margin:10px 0;}
+@@table.px-table{border-collapse:collapse;width:100%;font:400 .92rem/1.35 var(--body);min-width:560px;}
+@@table.px-table th,@@table.px-table td{padding:9px 12px;text-align:left;border-bottom:1px solid var(--soft);vertical-align:top;}
+@@table.px-table thead th{background:var(--ink);color:#fff;font-weight:700;white-space:nowrap;}
+@@table.px-table tbody th{font-weight:500;}
+@@table.px-table tbody th span{display:block;color:var(--mute);font-size:.8rem;}
+@@table.px-table td.yes{font-weight:700;}
+@@table.px-table td.miss{background:var(--hl);font-weight:800;}
+@@table.px-table td.adv,@@table.px-table td.na{color:var(--mute);}
+@@table.px-table code{font:500 .85rem/1.2 var(--mono);background:var(--soft);padding:2px 6px;border-radius:5px;}
+@@p.px-formula{font:500 .95rem/1.5 var(--mono);background:var(--panel);border:2px dashed var(--ink);border-radius:10px;padding:12px 14px;margin:10px 0 14px;}
+@@.px-rule dl.px-meta{grid-template-columns:auto 1fr;}
+@@.px-rule .px-examples code{font:500 .78rem/1.2 var(--mono);background:var(--soft);padding:2px 6px;border-radius:5px;overflow-wrap:anywhere;}
 
 /* ---- Streamlit widgets, restyled lightly (additive, so a missed selector is harmless) ---- */
 @@ [data-testid="stRadio"] label{background:var(--panel);border:2px solid var(--ink);border-radius:999px;padding:6px 16px;cursor:pointer;}

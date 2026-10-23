@@ -76,3 +76,10 @@ def test_columns_with_no_evidence_are_not_listed_for_review(tmp_path):
     p = tmp_path / "t.csv"
     p.write_text("city\nPune\nJaipur\n", encoding="utf-8")
     assert run_pipeline([p], RULES, SCORING, {}, CHECKLIST).review == []
+
+
+def test_scan_labelled_scores_a_folder_against_its_labels():
+    from privexis.pipeline import scan_labelled
+    findings, metrics = scan_labelled("data/holdout", "data/holdout/labels.csv", RULES, SCORING)
+    assert metrics["columns"] == len(findings) == 21
+    assert set(metrics["per_class"]) == {"NAME", "EMAIL", "PHONE", "GOVT_ID", "DOB"}

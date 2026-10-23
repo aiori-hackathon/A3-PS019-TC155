@@ -78,3 +78,56 @@ def test_accuracy_shows_undefined_as_na():
 def test_css_respects_reduced_motion_and_prefixes_rules():
     assert "prefers-reduced-motion" in ui.CSS
     assert "@@" not in ui.CSS
+
+
+def finding(cls="EMAIL", conf=0.6, evidence="e"):
+    return SimpleNamespace(cls=cls, confidence=conf, evidence=evidence)
+
+
+def test_probe_is_escaped_single_line_and_masks_values():
+    nasty = "<script>alert(1)</script>"
+    out = ui.probe_html(nasty, [nasty], finding(evidence=nasty), "NONE", "EMAIL", 0.5, nasty)
+    assert "<script>" not in out and "\n" not in out
+    assert ui._e(ui.mask_value(nasty)) in out
+
+
+def test_probe_marks_right_and_wrong_in_words():
+    out = ui.probe_html("x1", ["9876543210"], finding("PHONE"), "NONE", "PHONE", 0.5)
+    assert out.count("Right") == 1 and out.count("Wrong") == 1
+
+
+def test_probe_without_a_truth_shows_no_verdict_marks():
+    out = ui.probe_html("c", ["a@x.com"], finding(), "NONE", None, 0.5)
+    assert "Right" not in out and "Wrong" not in out
+
+
+def test_matrix_shows_required_gaps_loudly_and_escapes():
+    from privexis.linker import load_checklist
+    r = row(column="<b>", checklist=[
+        {"item": "purpose", "label": "Declared purpose", "kind": "metadata",
+         "required": True, "present": False},
+        {"item": "name_hint", "label": "Hint", "kind": "detection",
+         "required": False, "present": False}])
+    out = ui.matrix_html([r], load_checklist())
+    assert 'class="miss">NO<' in out and 'class="adv">no<' in out
+    assert "<code>&lt;b&gt;</code>" in out
+
+
+def test_gap_tally_counts_each_code():
+    rows = [row(gaps=["MISSING_PURPOSE"]), row(gaps=["MISSING_PURPOSE", "MISSING_OWNER"])]
+    out = ui.gap_tally_html(rows)
+    assert "No purpose: 2" in out and "No owner: 1" in out
+
+
+def test_rules_and_checklist_pages_render_from_the_real_config():
+    from privexis.engine import load_config
+    from privexis.linker import load_checklist
+    rules, scoring = load_config()
+    page = ui.rules_html(rules, scoring)
+    assert "created" in page and "0.5" in page
+    chk = ui.checklist_html(load_checklist())
+    assert "Declared purpose" in chk and "Required" in chk and "Government ID" in chk
+
+
+def test_about_lists_every_requirement():
+    assert ui.about_html().count("<tr>") == len(ui.REQUIREMENTS) + 1

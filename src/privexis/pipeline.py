@@ -10,6 +10,7 @@ from pathlib import Path
 import yaml
 
 from privexis.engine import score_column
+from privexis.evaluator import evaluate, load_labels
 from privexis.linker import link, orphaned_metadata
 from privexis.sampler import sample_path
 
@@ -49,6 +50,18 @@ def run_pipeline(paths, rules, scoring, metadata, checklist, k: int = 50) -> Pip
                           orphans=orphaned_metadata(findings, metadata),
                           review=needs_review(findings, scoring),
                           samples=samples)
+
+
+def scan_labelled(data_dir, labels_path, rules, scoring, k: int = 50):
+    """Scan every file in a folder and compare the result with its hand-written labels.
+
+    Used for the main labelled set (data/) and the held-out set (data/holdout/).
+    Returns (findings, metrics)."""
+    findings = []
+    for path in find_sources(data_dir):
+        for s in sample_path(path, k=k):
+            findings.append(score_column(s, rules, scoring))
+    return findings, evaluate(findings, load_labels(labels_path))
 
 
 def parse_metadata(raw: bytes, filename: str) -> dict:

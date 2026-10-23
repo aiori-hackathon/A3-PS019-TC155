@@ -24,3 +24,10 @@ def test_inventory_contains_email_candidate(tmp_path):
     main(["scan", "--data", str(d), "--config", "config",
           "--labels", str(tmp_path / "none.csv"), "--out", str(out)])
     assert "EMAIL" in (out / "inventory.csv").read_text(encoding="utf-8")
+
+def test_scan_also_scores_the_holdout_set(tmp_path):
+    d = make_data(tmp_path)
+    out = tmp_path / "out"
+    main(["scan", "--data", str(d), "--config", "config",
+          "--labels", str(tmp_path / "none.csv"), "--holdout", "data/holdout", "--out", str(out)])
+    assert (out / "metrics_holdout.json").exists()

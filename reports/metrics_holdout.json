@@ -1,0 +1,110 @@
+{
+  "per_class": {
+    "NAME": {
+      "tp": 2,
+      "fp": 2,
+      "fn": 0,
+      "precision": 0.5,
+      "recall": 1.0,
+      "f1": 0.667
+    },
+    "EMAIL": {
+      "tp": 2,
+      "fp": 0,
+      "fn": 0,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0
+    },
+    "PHONE": {
+      "tp": 2,
+      "fp": 1,
+      "fn": 0,
+      "precision": 0.667,
+      "recall": 1.0,
+      "f1": 0.8
+    },
+    "GOVT_ID": {
+      "tp": 3,
+      "fp": 0,
+      "fn": 1,
+      "precision": 1.0,
+      "recall": 0.75,
+      "f1": 0.857
+    },
+    "DOB": {
+      "tp": 1,
+      "fp": 2,
+      "fn": 1,
+      "precision": 0.333,
+      "recall": 0.5,
+      "f1": 0.4
+    }
+  },
+  "errors": [
+    [
+      [
+        "crm_leads.csv",
+        "-",
+        "company_name"
+      ],
+      "NONE",
+      "NAME"
+    ],
+    [
+      [
+        "crm_leads.csv",
+        "-",
+        "dob_text"
+      ],
+      "DOB",
+      "NONE"
+    ],
+    [
+      [
+        "crm_leads.csv",
+        "-",
+        "last_contacted"
+      ],
+      "NONE",
+      "DOB"
+    ],
+    [
+      [
+        "crm_leads.csv",
+        "-",
+        "notes"
+      ],
+      "NONE",
+      "NAME"
+    ],
+    [
+      [
+        "crm_leads.csv",
+        "-",
+        "passport_no"
+      ],
+      "GOVT_ID",
+      "NONE"
+    ],
+    [
+      [
+        "hr_export.csv",
+        "-",
+        "date_of_joining"
+      ],
+      "NONE",
+      "DOB"
+    ],
+    [
+      [
+        "hr_export.csv",
+        "-",
+        "ticket_number"
+      ],
+      "NONE",
+      "PHONE"
+    ]
+  ],
+  "columns": 21
+}

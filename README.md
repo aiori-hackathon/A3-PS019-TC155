@@ -2,7 +2,7 @@
 
 Team Infynex | AIORI Hackathon 3 | PS-019 (Cybersecurity)
 
-**Live demo:** https://a3-ps019-tc155-aiori.streamlit.app/  
+**Live demo:** https://YOUR-APP-NAME.streamlit.app  *(replace with your deployed link)*
 
 Privexis scans **synthetic** CSV and SQLite data, finds candidate personal-data
 fields across five classes (name, email, phone, government ID, date of birth),
@@ -14,7 +14,7 @@ Use it from the command line or from the web app.
 > legal or compliance determination, never decides a lawful basis, and does not
 > infer how data flows between systems.
 
-**New here?**  The whole flow in 20 lines is in [PSEUDOCODE.md](PSEUDOCODE.md).
+**New here?** Read [docs/HOW_IT_WORKS.md](docs/HOW_IT_WORKS.md) for a plain-language walkthrough of every file and how detection works. The whole flow in 20 lines is in [PSEUDOCODE.md](PSEUDOCODE.md).
 
 ## PS-019 requirements and where to find them
 
@@ -22,12 +22,12 @@ Use it from the command line or from the web app.
 |---|---|
 | Support CSV and one SQL database | `src/privexis/connectors.py` (CSV, SQLite read-only) |
 | Identify 5 predefined data classes | `config/rules.yaml` |
-| Small manually labelled test set | `data/labels.csv`, written by hand (see [docs/LABELLING.md](docs/LABELLING.md)) |
+| Small manually labelled test set | `data/labels.csv` (main set) and `data/holdout/labels.csv` (fresh set), written by hand (see [docs/LABELLING.md](docs/LABELLING.md)) |
 | Detect candidate fields with configurable rules | `config/rules.yaml`, `src/privexis/engine.py` |
 | Link fields to purpose and retention metadata | `config/metadata.yaml`, `src/privexis/linker.py` |
 | Configurable evidence checklist | `config/checklist.yaml` |
 | Flag missing purpose or retention (and other evidence) | `reports/gap_report.md`, `reports/inventory.csv` |
-| Per-class precision and recall | `reports/metrics.json`, `src/privexis/evaluator.py` |
+| Per-class precision and recall | `reports/metrics.json`, `reports/metrics_holdout.json`, `src/privexis/evaluator.py` |
 | Technical evidence kept separate from legal interpretation | disclaimer in every report; status says "Candidate", never "compliant" |
 | No lawful-basis decision, no data-flow inference | nothing in the code attempts either |
 | Prototype demo with pseudocode | [PSEUDOCODE.md](PSEUDOCODE.md) |
@@ -90,14 +90,19 @@ Every row is a *candidate* for human review. Nothing is called verified, complia
 
 ## The web app
 
-`streamlit run app.py` opens an interface where you can:
+`streamlit run app.py` opens an interface with six tabs:
 
-- scan the built-in demo data and see precision and recall change as you move the threshold
-- **upload your own CSV or SQLite files** (and an optional metadata file) and get an inventory
-- see one evidence tag per flagged column: class, confidence against the threshold,
-  masked sample values, declared purpose / retention / owner, checklist marks and gaps
-- see a **Needs a closer look** list of columns that were not flagged but had some evidence
-- download `inventory.csv`, `inventory.json` and `gap_report.md`
+| Tab | What it shows |
+|---|---|
+| **Evidence** | One tag per flagged column: class, confidence against the threshold, masked sample values, declared purpose / retention / owner, checklist marks. Plus a **Needs a closer look** list. |
+| **Gaps** | The evidence checklist as a table (one row per field, one column per item), a tally of gap types, orphaned metadata, and downloads (`inventory.csv`, `inventory.json`, `gap_report.md`). |
+| **Accuracy** | Per-class precision and recall on **two** labelled sets, with the mistakes listed. The threshold slider changes the bars. |
+| **Try to fool it** | Columns whose name says one thing and whose values say another, shown next to what a tool that only reads column names would conclude. You can also type your own made-up column. |
+| **Rules** | `config/rules.yaml` and `config/checklist.yaml`, read live and shown as tables. |
+| **About** | The PS-019 requirements and where each one lives. |
+
+You can scan the built-in demo data or **upload your own CSV or SQLite files** (and an
+optional metadata file).
 
 The web app is an optional extra on top of the scanner. Use **synthetic or test data only**.
 Uploaded files are read in a temporary folder that is deleted right after the scan, nothing
@@ -108,10 +113,13 @@ is saved, and sample values are masked on screen.
 | File | Contents |
 |---|---|
 | `inventory.json` / `inventory.csv` | Candidate fields with evidence, purpose, retention, owner, checklist and gaps |
+| `metrics_holdout.json` | Per-class results on the fresh labelled set (see Evaluation) |
 | `gap_report.md` | Checklist table, fields with gaps, needs-review list, orphaned declared metadata |
 | `metrics.json` | Per-class TP / FP / FN, precision, recall, F1 |
 
-## Evaluation (synthetic set, 22 hand-labelled columns)
+## Evaluation on two labelled sets
+
+### Main set (22 hand-labelled columns, `data/`)
 
 | Class | Precision before | Precision after | Recall |
 |---|---|---|---|
@@ -133,15 +141,45 @@ configuration. They are not a claim of real-world accuracy. The unit of evaluati
 column, not the individual value. The labels were written by hand by the team that also
 designed the data, so they are not independent (see [docs/LABELLING.md](docs/LABELLING.md)).
 
+### Fresh set (21 hand-labelled columns, `data/holdout/`)
+
+A second set in two files the rules were never written against (`hr_export.csv`,
+`crm_leads.csv`). It was scored before any rule was changed, and the rules have not
+been touched since. It is the more honest of the two results.
+
+| Class | Precision | Recall |
+|---|---|---|
+| NAME | 0.5 | 1.0 |
+| EMAIL | 1.0 | 1.0 |
+| PHONE | 0.667 | 1.0 |
+| GOVT_ID | 1.0 | 0.75 |
+| DOB | 0.333 | 0.5 |
+
+What went wrong, column by column:
+
+| Column | Result | Why |
+|---|---|---|
+| `company_name`, `notes` | flagged as NAME | the name pattern matches any text of two or more words |
+| `date_of_joining`, `last_contacted` | flagged as DOB | valid dates; `joining` is not covered by a negative hint |
+| `ticket_number` | flagged as PHONE | ten digits starting with 6-9 |
+| `dob_text` | DOB missed | spelled-out dates such as `5 October 1976` are not a supported format |
+| `passport_no` | GOVT_ID missed | only Aadhaar-style numbers and PAN are supported government IDs |
+
+These are known limits, not bugs we hid. Fixing them by editing the rules would be easy, but
+doing so would turn this set into a tuning set. To measure an improvement honestly, label a
+third set first. The sets are small (21 and 22 columns), so single columns move the numbers a lot.
+
 ## Limitations and future work
 
+- Free text of two or more words (for example `notes`) can be flagged as NAME.
+- Dates in a spelled-out format and passport numbers are not recognised.
 - A date column whose name is not covered by a negative hint can still be flagged as DOB.
 - `05/06/1990` is ambiguous between DMY and MDY.
 - Email validation is a practical subset of RFC 5322.
 - Columns with a low share of PII values fall below the threshold (they appear under needs review).
 - Name detection is a pattern, not a language model. **spaCy NER / Microsoft Presidio** are
   cited in our proposal as the idea we build on; using them for name detection is **future work** and is not implemented.
-- Accuracy is measured on synthetic data only, and only for the demo set (uploads have no answer key).
+- Accuracy is measured on synthetic data only, and only on the built-in sets (uploads have no answer key).
 
 ## Configuration
 

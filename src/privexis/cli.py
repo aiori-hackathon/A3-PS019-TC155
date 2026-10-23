@@ -6,7 +6,7 @@ from pathlib import Path
 from privexis.engine import load_config
 from privexis.evaluator import evaluate, load_labels
 from privexis.linker import load_checklist, load_metadata
-from privexis.pipeline import find_sources, run_pipeline
+from privexis.pipeline import find_sources, run_pipeline, scan_labelled
 from privexis.report import write_gap_report, write_inventory
 
 
@@ -23,10 +23,19 @@ def build_parser() -> argparse.ArgumentParser:
                       help="folder with rules.yaml, checklist.yaml and metadata.yaml")
     scan.add_argument("--labels", default="data/labels.csv",
                       help="hand-labelled ground truth (evaluation is skipped if absent)")
+    scan.add_argument("--holdout", default="data/holdout",
+                      help="second labelled set the rules were never tuned on "
+                           "(skipped if its labels.csv is absent)")
     scan.add_argument("--out", default="reports", help="output folder")
     scan.add_argument("--sample-size", type=int, default=50,
                       help="max values sampled per column")
     return parser
+
+
+def print_metrics(per_class: dict) -> None:
+    print("class      precision   recall")
+    for cls, m in per_class.items():
+        print(f"{cls:9} {str(m['precision']):>10} {str(m['recall']):>8}")
 
 
 def run_scan(args) -> int:
@@ -54,14 +63,26 @@ def run_scan(args) -> int:
         else:
             (Path(args.out) / "metrics.json").write_text(
                 json.dumps(result, indent=2), encoding="utf-8")
-            print("\nclass      precision   recall")
-            for cls, m in result["per_class"].items():
-                print(f"{cls:9} {str(m['precision']):>10} {str(m['recall']):>8}")
+            print(f"\nMain labelled set ({result['columns']} columns)")
+            print_metrics(result["per_class"])
     else:
         print("No labels file found: evaluation skipped.")
 
+    holdout = Path(args.holdout)
+    if (holdout / "labels.csv").exists():
+        try:
+            _, held = scan_labelled(holdout, holdout / "labels.csv", rules, scoring,
+                                    k=args.sample_size)
+        except ValueError as e:
+            print(f"Held-out evaluation skipped: {e}")
+        else:
+            (Path(args.out) / "metrics_holdout.json").write_text(
+                json.dumps(held, indent=2), encoding="utf-8")
+            print(f"\nHeld-out set ({held['columns']} columns the rules were never tuned on)")
+            print_metrics(held["per_class"])
+
     print(f"\nReports written to {args.out}/ (inventory.json, inventory.csv, "
-          f"gap_report.md, metrics.json)")
+          f"gap_report.md, metrics.json, metrics_holdout.json)")
     print("Reminder: this is technical evidence for human review, not a legal determination.")
     return 0
 
