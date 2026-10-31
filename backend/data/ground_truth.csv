@@ -1,0 +1,176 @@
+column_name,sample_values,label
+name,"[""Synthetic Person 001""]",C1
+full_name,"[""Synthetic Person 001""]",C1
+first_name,"[""Synthetic Person 001""]",C1
+given_name,"[""Synthetic Person 001""]",C1
+last_name,"[""Synthetic Person 001""]",C1
+family_name,"[""Synthetic Person 001""]",C1
+preferred_name,"[""Synthetic Person 001""]",C1
+legal_name,"[""Synthetic Person 001""]",C1
+individual_name,"[""Synthetic Person 001""]",C1
+date_of_birth,"[""2000-01-15""]",C1
+birth_date,"[""2000-01-15""]",C1
+birthdate,"[""2000-01-15""]",C1
+dob,"[""2000-01-15""]",C1
+gender,"[""synthetic-unspecified""]",C1
+gender_identity,"[""synthetic-unspecified""]",C1
+age,"[""34""]",C1
+person_age,"[""34""]",C1
+child_name,"[""Synthetic Person 001""]",C1
+guardian_name,"[""Synthetic Person 001""]",C1
+employee_name,"[""Synthetic Person 001""]",C1
+patient_name,"[""Synthetic Person 001""]",C1
+mother_maiden_name,"[""Synthetic Person 001""]",C1
+display_name,"[""Synthetic Person 001""]",C1
+identity_name,"[""Synthetic Person 001""]",C1
+person_dob,"[""2000-01-15""]",C1
+email,"[""person001@example.invalid""]",C2
+email_address,"[""person001@example.invalid""]",C2
+e_mail_address,"[""0000001234""]",C2
+contact_email,"[""person001@example.invalid""]",C2
+work_email,"[""person001@example.invalid""]",C2
+primary_email,"[""person001@example.invalid""]",C2
+secondary_email,"[""person001@example.invalid""]",C2
+member_email,"[""person001@example.invalid""]",C2
+phone,"[""0000001234""]",C2
+phone_number,"[""0000001234""]",C2
+telephone,"[""0000001234""]",C2
+telephone_number,"[""0000001234""]",C2
+mobile,"[""0000001234""]",C2
+mobile_number,"[""0000001234""]",C2
+contact_number,"[""0000001234""]",C2
+contact_phone,"[""0000001234""]",C2
+primary_phone,"[""0000001234""]",C2
+alternate_phone,"[""0000001234""]",C2
+home_phone,"[""0000001234""]",C2
+emergency_phone,"[""0000001234""]",C2
+sms_number,"[""0000001234""]",C2
+phone_contact,"[""0000001234""]",C2
+phone_1,"[""0000001234""]",C2
+email_1,"[""person001@example.invalid""]",C2
+emergency_contact_phone,"[""0000001234""]",C2
+aadhaar,"[""000000000001""]",C3
+aadhaar_number,"[""000000000001""]",C3
+aadhar_number,"[""000000000001""]",C3
+aadhaar_id,"[""000000000001""]",C3
+pan,"[""AAAAA0000A""]",C3
+pan_number,"[""AAAAA0000A""]",C3
+pan_id,"[""AAAAA0000A""]",C3
+passport,"[""T0000001""]",C3
+passport_number,"[""T0000001""]",C3
+passport_no,"[""T0000001""]",C3
+passport_id,"[""T0000001""]",C3
+voter_id,"[""SYNTHETIC-ID-001""]",C3
+voter_id_number,"[""SYNTHETIC-ID-001""]",C3
+voter_identity,"[""SYNTHETIC-ID-001""]",C3
+voter_card_number,"[""SYNTHETIC-ID-001""]",C3
+voter_card_id,"[""SYNTHETIC-ID-001""]",C3
+electoral_id,"[""SYNTHETIC-ID-001""]",C3
+driving_license,"[""SYNTHETIC-ID-001""]",C3
+driving_license_number,"[""SYNTHETIC-ID-001""]",C3
+driving_licence_number,"[""SYNTHETIC-ID-001""]",C3
+driver_license_number,"[""SYNTHETIC-ID-001""]",C3
+driver_licence_no,"[""SYNTHETIC-ID-001""]",C3
+dl_number,"[""SYNTHETIC-ID-001""]",C3
+license_number,"[""SYNTHETIC-ID-001""]",C3
+aadhaar_card_number,"[""000000000001""]",C3
+bank_account,"[""0000000000000001""]",C4
+bank_account_number,"[""0000000000000001""]",C4
+bank_account_no,"[""0000000000000001""]",C4
+account_number,"[""0000000000000001""]",C4
+account_no,"[""0000000000000001""]",C4
+savings_account_number,"[""0000000000000001""]",C4
+current_account_number,"[""0000000000000001""]",C4
+beneficiary_account_number,"[""0000000000000001""]",C4
+ifsc,"[""TEST0ABCD01""]",C4
+ifsc_code,"[""TEST0ABCD01""]",C4
+routing_ifsc,"[""TEST0ABCD01""]",C4
+card_number,"[""0000000000000001""]",C4
+credit_card_number,"[""0000000000000001""]",C4
+debit_card_number,"[""0000000000000001""]",C4
+payment_card_number,"[""0000000000000001""]",C4
+credit_card,"[""0000000000000001""]",C4
+debit_card,"[""0000000000000001""]",C4
+upi,"[""person001@upi.invalid""]",C4
+upi_id,"[""person001@upi.invalid""]",C4
+upi_address,"[""person001@upi.invalid""]",C4
+vpa,"[""person001@upi.invalid""]",C4
+virtual_payment_address,"[""person001@upi.invalid""]",C4
+primary_upi_id,"[""person001@upi.invalid""]",C4
+transaction_card_number,"[""0000000000000001""]",C4
+bank_account_reference,"[""0000000000000001""]",C4
+address,"[""001 Synthetic Test Lane""]",C5
+postal_address,"[""001 Synthetic Test Lane""]",C5
+residential_address,"[""001 Synthetic Test Lane""]",C5
+home_address,"[""001 Synthetic Test Lane""]",C5
+street_address,"[""001 Synthetic Test Lane""]",C5
+mailing_address,"[""001 Synthetic Test Lane""]",C5
+address_line_1,"[""001 Synthetic Test Lane""]",C5
+address_line_2,"[""001 Synthetic Test Lane""]",C5
+billing_address,"[""001 Synthetic Test Lane""]",C5
+delivery_address,"[""001 Synthetic Test Lane""]",C5
+pin_code,"[""001 Synthetic Test Lane""]",C5
+pincode,"[""001 Synthetic Test Lane""]",C5
+postal_code,"[""001 Synthetic Test Lane""]",C5
+zip_code,"[""001 Synthetic Test Lane""]",C5
+geo_coordinates,"[""12.3456,78.9012""]",C5
+coordinates,"[""12.3456,78.9012""]",C5
+gps_coordinates,"[""12.3456,78.9012""]",C5
+latitude,"[""12.3456,78.9012""]",C5
+longitude,"[""12.3456,78.9012""]",C5
+geolocation,"[""12.3456,78.9012""]",C5
+geo_latitude,"[""12.3456,78.9012""]",C5
+geo_longitude,"[""12.3456,78.9012""]",C5
+location_coordinates,"[""12.3456,78.9012""]",C5
+home_location,"[""12.3456,78.9012""]",C5
+location_address,"[""12.3456,78.9012""]",C5
+product_name,"[""Synthetic Widget""]",not personal data
+company_name,"[""Synthetic Company""]",not personal data
+file_name,"[""fixture.csv""]",not personal data
+table_name,"[""synthetic_records""]",not personal data
+name_sort_order,"[""family-first""]",not personal data
+user_name_rule,"[""lowercase""]",not personal data
+container_name,"[""synthetic-container""]",not personal data
+profile_name_format,"[""title-case""]",not personal data
+gender_field_enabled,"[""false""]",not personal data
+middle_initial_policy,"[""optional""]",not personal data
+email_opt_in,"[""true""]",not personal data
+email_domain_rule,"[""example.invalid""]",not personal data
+phone_verified,"[""false""]",not personal data
+mobile_app_version,"[""1.2.3""]",not personal data
+phone_area_code,"[""000""]",not personal data
+email_template,"[""welcome-v2""]",not personal data
+contact_channel,"[""push""]",not personal data
+sms_retry_count,"[""3""]",not personal data
+email_delivery_status,"[""queued""]",not personal data
+notification_email_template,"[""reminder-v1""]",not personal data
+ticket_number,"[""ABCDE1234F""]",not personal data
+order_id,"[""202610310001""]",not personal data
+tracking_number,"[""9876543210""]",not personal data
+product_code,"[""AAAAA0000A""]",not personal data
+transaction_reference,"[""0000000000000000""]",not personal data
+pan_prefix_config,"[""ABCDE""]",not personal data
+aadhaar_reference_doc,"[""SYN-DOC-1""]",not personal data
+passport_export_batch,"[""SYN-BATCH-1""]",not personal data
+driving_license_template,"[""SYN-TEMPLATE-1""]",not personal data
+voter_export_batch,"[""202610""]",not personal data
+transaction_reference,"[""0000000000000000""]",not personal data
+order_number,"[""000000000000""]",not personal data
+shipment_id,"[""9876543210""]",not personal data
+account_age_days,"[""365""]",not personal data
+card_layout_version,"[""0000""]",not personal data
+ifsc_reference_doc,"[""DOC-1234""]",not personal data
+upi_feature_enabled,"[""true""]",not personal data
+bank_account_format,"[""000000000000""]",not personal data
+credit_card_token_template,"[""SYN-TOKEN-1""]",not personal data
+virtual_account_id,"[""00001234""]",not personal data
+map_tile_id,"[""000000123""]",not personal data
+geo_grid_resolution,"[""0.001""]",not personal data
+address_format_code,"[""A1B2""]",not personal data
+latitude_unit_label,"[""degrees""]",not personal data
+postal_template_id,"[""000000""]",not personal data
+coordinates_precision_scale,"[""6""]",not personal data
+address_template_key,"[""SYN-ADDR-1""]",not personal data
+location_service_enabled,"[""false""]",not personal data
+postal_code_pattern,"[""000000""]",not personal data
+delivery_zone_code,"[""ZONE-03""]",not personal data

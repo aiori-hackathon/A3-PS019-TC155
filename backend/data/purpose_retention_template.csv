@@ -1,0 +1,7 @@
+source,table_name,column_name,purpose,retention
+personal_identity.csv,synthetic_records,first_name,Synthetic testing,30 days
+personal_identity.csv,synthetic_records,date_of_birth,,
+contact_information.csv,synthetic_records,email_address,Synthetic testing,
+government_identifiers.csv,synthetic_records,aadhaar_number,,
+financial_information.csv,synthetic_records,bank_account_number,Synthetic testing,30 days
+location_address.csv,synthetic_records,postal_address,,30 days

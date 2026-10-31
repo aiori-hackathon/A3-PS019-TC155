@@ -1,0 +1,4 @@
+customer_id,email,phone,postal_code,date_of_birth,health_condition,event_count
+SYN-C-1042,ana.sample@example.invalid,555-010-2020,00041,1992-04-11,synthetic asthma example,18
+SYN-C-1043,lee.sample@example.invalid,555-010-3030,00042,1987-09-08,synthetic allergy example,5
+SYN-C-1044,sam.sample@example.invalid,555-010-4040,00043,2001-01-22,synthetic none,12

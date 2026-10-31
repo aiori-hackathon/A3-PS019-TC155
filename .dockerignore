@@ -1,0 +1,12 @@
+.git
+.next
+node_modules
+.venv
+__pycache__
+*.pyc
+.env
+.env.*
+backend/uploads
+backend/privexis.db
+backend/*.sqlite*
+coverage

@@ -1,0 +1,9 @@
+# Privexis
+
+Privexis is a privacy evidence workbench for technical discovery and human review of candidate personal-data fields in structured sources.
+
+It supports bounded CSV and read-only SQLite scans, rule-based candidate findings, declared purpose and retention metadata, human review history, synthetic labelled evaluation, and technical exports.
+
+Privexis does not determine lawful basis, certify legal compliance, make deletion decisions, or claim universal data-flow discovery. Findings require human review.
+
+Public pages: /features, /how-it-works, /security, /documentation, /about, /faq, /privacy, /terms, /contact.

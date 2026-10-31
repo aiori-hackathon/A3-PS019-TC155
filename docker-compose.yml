@@ -1,0 +1,53 @@
+services:
+  db:
+    image: postgres:17-alpine
+    environment:
+      POSTGRES_DB: privexis
+      POSTGRES_USER: privexis
+      POSTGRES_PASSWORD: privexis
+    volumes:
+      - privexis_db:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U privexis -d privexis"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+  backend:
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
+    environment:
+      DATABASE_URL: postgresql+psycopg://privexis:privexis@db:5432/privexis
+      PRIVEXIS_SECRET_KEY: local-compose-development-secret-change-before-deployment-2026
+      PRIVEXIS_ENV: development
+      PRIVEXIS_FRONTEND_ORIGIN: http://localhost:3000
+      PRIVEXIS_UPLOAD_DIR: /app/backend/uploads
+      PRIVEXIS_MAX_UPLOAD_MB: 15
+      PRIVEXIS_SCAN_SAMPLE_ROWS: 500
+    volumes:
+      - privexis_uploads:/app/backend/uploads
+    ports:
+      - "8000:8000"
+    depends_on:
+      db:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/api/v1/health/ready', timeout=2)"]
+      interval: 10s
+      timeout: 3s
+      retries: 10
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        NEXT_PUBLIC_API_URL: http://localhost:8000
+        NEXT_PUBLIC_SITE_URL: http://localhost:3000
+    ports:
+      - "3000:3000"
+    depends_on:
+      backend:
+        condition: service_healthy
+volumes:
+  privexis_db:
+  privexis_uploads:

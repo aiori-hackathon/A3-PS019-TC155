@@ -1,0 +1,64 @@
+services:
+  db:
+    image: postgres:17-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: privexis
+      POSTGRES_USER: privexis
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in .env.oci}
+    volumes:
+      - privexis_db:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U privexis -d privexis"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  backend:
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
+    restart: unless-stopped
+    environment:
+      DATABASE_URL: ${DATABASE_URL:?Set DATABASE_URL in .env.oci}
+      PRIVEXIS_SECRET_KEY: ${PRIVEXIS_SECRET_KEY:?Set PRIVEXIS_SECRET_KEY in .env.oci}
+      PRIVEXIS_ENV: production
+      PRIVEXIS_UPLOAD_DIR: /app/backend/uploads
+      PRIVEXIS_FRONTEND_ORIGIN: ${PRIVEXIS_FRONTEND_ORIGIN:?Set the Vercel origin in .env.oci}
+      PRIVEXIS_MAX_UPLOAD_MB: ${PRIVEXIS_MAX_UPLOAD_MB:-15}
+      PRIVEXIS_SCAN_SAMPLE_ROWS: ${PRIVEXIS_SCAN_SAMPLE_ROWS:-500}
+    volumes:
+      - privexis_uploads:/app/backend/uploads
+    expose:
+      - "8000"
+    depends_on:
+      db:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/api/v1/health/ready', timeout=3)"]
+      interval: 15s
+      timeout: 5s
+      retries: 10
+
+  caddy:
+    image: caddy:2-alpine
+    restart: unless-stopped
+    environment:
+      API_DOMAIN: ${API_DOMAIN:?Set API_DOMAIN to a DNS name pointing at this OCI VM}
+    ports:
+      - "80:80"
+      - "443:443"
+      - "443:443/udp"
+    volumes:
+      - ./Caddyfile.oci:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    depends_on:
+      backend:
+        condition: service_healthy
+
+volumes:
+  privexis_db:
+  privexis_uploads:
+  caddy_data:
+  caddy_config:
