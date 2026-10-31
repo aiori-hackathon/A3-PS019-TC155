@@ -177,7 +177,7 @@ python -m backend.data.generate_synthetic_datasets
 | `src/` | Next.js application and interface components |
 | `public/` | Brand assets, favicon, and public metadata |
 | `docs/` | API, architecture, evaluation, security, and technical report |
-| `assets/hackathon/` | Original problem statement, proposed structure, and team intro link |
+| Repository root | Hackathon PDFs and team-introduction link, visible directly on the GitHub main page |
 | `deploy/oci/` | Optional OCI Docker Compose and Caddy configuration |
 | `render.yaml` | Render Blueprint for the live API and PostgreSQL database |
 
@@ -189,7 +189,8 @@ python -m backend.data.generate_synthetic_datasets
 - [Hackathon source repository](https://github.com/aiori-hackathon/A3-PS019-TC155)
 - [Synthetic fixtures](backend/data/demo_files/README.md)
 - [Deployment notes](docs/DEPLOYMENT.md)
-- [Problem statement PDF](assets/hackathon/Privexis.pdf)
-- [Proposed structure PDF](assets/hackathon/Proposed-structure-hackathon.pdf)
+- [Problem statement PDF](Privexis.pdf)
+- [Proposed structure PDF](Proposed-structure-hackathon.pdf)
+- [Team introduction link](Video%20Introduction.txt)
 
 > **Scope:** All included evaluation fixtures are synthetic. Findings are technical evidence for human review, not legal interpretations or compliance determinations.
