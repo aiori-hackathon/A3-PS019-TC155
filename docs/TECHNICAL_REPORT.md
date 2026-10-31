@@ -56,7 +56,7 @@ These figures describe this small, synthetic, field-name evaluation only. They a
 - ESLint: passed with `corepack pnpm lint --quiet`.
 - Production build: passed with `corepack pnpm build` after the final checklist UI changes.
 - Live UI smoke check: search found the evaluation page; the assistant opened and answered the five-class prompt; a synthetic identity CSV produced eight candidate findings visible in Inventory and eight corresponding metadata/review gaps in Evidence Gaps.
-- Live endpoints: home, Rules, Evaluation, and backend OpenAPI returned HTTP 200. The frontend remains running at `http://localhost:3000` and the API at `http://localhost:8000`.
+- Live endpoints: home, Rules, Evaluation, and backend OpenAPI returned HTTP 200 during the local smoke run. The deployed frontend is [privexis.vercel.app](https://privexis.vercel.app/) and the API readiness endpoint is [privexis-api.onrender.com/api/v1/health/ready](https://privexis-api.onrender.com/api/v1/health/ready).
 
 ## Scope notes
 

@@ -8,4 +8,4 @@
 - [x] Add functional product/findings search and a floating local-guidance assistant.
 - [x] Remove seeded demo accounts and run backend/frontend checks.
 
-External AI, direct database-server connectors, and public deployment remain outside the current local version.
+External AI and direct database-server connectors remain outside scope. The evaluator demo is deployed at [privexis.vercel.app](https://privexis.vercel.app/) with a FastAPI backend on Render Free; it is intended for synthetic data and inherits the free-tier availability and storage limits documented in [Deployment](DEPLOYMENT.md).

@@ -1,6 +1,6 @@
 # Database schema
 
-The application uses SQLAlchemy declarative models and Alembic revisions. `DATABASE_URL` selects PostgreSQL or the local SQLite development fallback.
+The application uses SQLAlchemy declarative models and Alembic revisions. `DATABASE_URL` selects PostgreSQL or the local SQLite development fallback. The live Render deployment uses managed PostgreSQL; uploaded-file storage remains separate from relational database storage.
 
 | Entity | Purpose | Key relationships |
 | --- | --- | --- |

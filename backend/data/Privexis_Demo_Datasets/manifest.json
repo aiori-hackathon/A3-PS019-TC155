@@ -1,0 +1,92 @@
+[
+  {
+    "id": "personal_identity-csv",
+    "name": "Personal identity \u00b7 CSV",
+    "class_code": "C1",
+    "class_name": "Personal identity",
+    "kind": "csv",
+    "filename": "personal_identity.csv",
+    "description": "Synthetic personal identity fields and look-alike negative columns."
+  },
+  {
+    "id": "personal_identity-sqlite",
+    "name": "Personal identity \u00b7 SQLite",
+    "class_code": "C1",
+    "class_name": "Personal identity",
+    "kind": "sqlite",
+    "filename": "personal_identity.sqlite3",
+    "description": "SQLite version of the synthetic personal identity fixture."
+  },
+  {
+    "id": "contact_information-csv",
+    "name": "Contact information \u00b7 CSV",
+    "class_code": "C2",
+    "class_name": "Contact information",
+    "kind": "csv",
+    "filename": "contact_information.csv",
+    "description": "Synthetic contact information fields and look-alike negative columns."
+  },
+  {
+    "id": "contact_information-sqlite",
+    "name": "Contact information \u00b7 SQLite",
+    "class_code": "C2",
+    "class_name": "Contact information",
+    "kind": "sqlite",
+    "filename": "contact_information.sqlite3",
+    "description": "SQLite version of the synthetic contact information fixture."
+  },
+  {
+    "id": "government_identifiers-csv",
+    "name": "Government identifiers \u00b7 CSV",
+    "class_code": "C3",
+    "class_name": "Government identifiers",
+    "kind": "csv",
+    "filename": "government_identifiers.csv",
+    "description": "Synthetic government identifiers fields and look-alike negative columns."
+  },
+  {
+    "id": "government_identifiers-sqlite",
+    "name": "Government identifiers \u00b7 SQLite",
+    "class_code": "C3",
+    "class_name": "Government identifiers",
+    "kind": "sqlite",
+    "filename": "government_identifiers.sqlite3",
+    "description": "SQLite version of the synthetic government identifiers fixture."
+  },
+  {
+    "id": "financial_information-csv",
+    "name": "Financial information \u00b7 CSV",
+    "class_code": "C4",
+    "class_name": "Financial information",
+    "kind": "csv",
+    "filename": "financial_information.csv",
+    "description": "Synthetic financial information fields and look-alike negative columns."
+  },
+  {
+    "id": "financial_information-sqlite",
+    "name": "Financial information \u00b7 SQLite",
+    "class_code": "C4",
+    "class_name": "Financial information",
+    "kind": "sqlite",
+    "filename": "financial_information.sqlite3",
+    "description": "SQLite version of the synthetic financial information fixture."
+  },
+  {
+    "id": "location_address-csv",
+    "name": "Location / address \u00b7 CSV",
+    "class_code": "C5",
+    "class_name": "Location / address",
+    "kind": "csv",
+    "filename": "location_address.csv",
+    "description": "Synthetic location / address fields and look-alike negative columns."
+  },
+  {
+    "id": "location_address-sqlite",
+    "name": "Location / address \u00b7 SQLite",
+    "class_code": "C5",
+    "class_name": "Location / address",
+    "kind": "sqlite",
+    "filename": "location_address.sqlite3",
+    "description": "SQLite version of the synthetic location / address fixture."
+  }
+]

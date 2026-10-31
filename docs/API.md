@@ -15,4 +15,4 @@ All endpoints are under `/api/v1`. The browser supplies a random `X-Workspace-Ke
 - `POST /assistant`: local product guidance; source data is not sent to an external provider.
 - `GET /reports/inventory.csv`, `GET /reports/summary.json`: exports.
 
-CSV is UTF-8 with a header row. SQLite sources are opened read-only. Uploaded files remain on the API host until removed from the source registry.
+CSV is UTF-8 with a header row. SQLite sources are opened read-only. Uploaded files are stored on the API host and removed when their source is deleted. The evaluator API runs on Render Free, whose filesystem is ephemeral; uploads can also be lost on restart, redeploy, or spin-down. The live demo is for synthetic data only.

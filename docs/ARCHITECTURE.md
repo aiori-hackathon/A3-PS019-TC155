@@ -5,8 +5,8 @@
 - Next.js App Router renders public product pages and the browser-local workspace.
 - FastAPI validates inputs, scopes records to the workspace key, invokes ingestion/scanning services, and returns structured results.
 - SQLAlchemy stores workspace identities, source registrations, scans, findings, field mappings, review events, and audit events. The model retains legacy user credential/session columns for database migration compatibility; no login or signup routes use them.
-- SQLite is the local application database and supported SQL source fixture. Alembic manages the application schema.
-- Uploaded source artifacts live in a private server directory; the application database stores their generated storage path and source metadata.
+- SQLite is the local application database fallback and a supported SQL source fixture. The live evaluator deployment uses Render PostgreSQL. Alembic manages the application schema.
+- Uploaded source artifacts live in a private server directory; the application database stores their generated storage path and source metadata. Render Free has an ephemeral filesystem, so uploads and local SQLite files are lost when the service restarts, redeploys, or spins down.
 
 ## Data flow and boundaries
 
@@ -16,4 +16,4 @@ The source database/file is distinct from the Privexis application database. SQL
 
 ## Deployment and limitations
 
-Docker Compose starts the database, applies migrations, and launches the API and website. The application exposes no account registration or sign-in flow. Scanning runs synchronously with a bounded sample. Public deployment needs operational controls such as distributed throttling, private upload retention, monitoring, and an independent security review.
+Docker Compose starts the local database, applies migrations, and launches the API and website. The live evaluator deployment uses Vercel for the frontend and Render Free for FastAPI and PostgreSQL. The application exposes no account registration or sign-in flow. Scanning runs synchronously with a bounded sample. The public demo is for synthetic data only; production use requires operational controls such as distributed throttling, durable private upload storage, monitoring, and an independent security review.

@@ -5,7 +5,7 @@ services:
     environment:
       POSTGRES_DB: privexis
       POSTGRES_USER: privexis
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in .env.oci}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in deploy/oci/.env}
     volumes:
       - privexis_db:/var/lib/postgresql/data
     healthcheck:
@@ -16,15 +16,15 @@ services:
 
   backend:
     build:
-      context: .
+      context: ../..
       dockerfile: backend/Dockerfile
     restart: unless-stopped
     environment:
-      DATABASE_URL: ${DATABASE_URL:?Set DATABASE_URL in .env.oci}
-      PRIVEXIS_SECRET_KEY: ${PRIVEXIS_SECRET_KEY:?Set PRIVEXIS_SECRET_KEY in .env.oci}
+      DATABASE_URL: ${DATABASE_URL:?Set DATABASE_URL in deploy/oci/.env}
+      PRIVEXIS_SECRET_KEY: ${PRIVEXIS_SECRET_KEY:?Set PRIVEXIS_SECRET_KEY in deploy/oci/.env}
       PRIVEXIS_ENV: production
       PRIVEXIS_UPLOAD_DIR: /app/backend/uploads
-      PRIVEXIS_FRONTEND_ORIGIN: ${PRIVEXIS_FRONTEND_ORIGIN:?Set the Vercel origin in .env.oci}
+      PRIVEXIS_FRONTEND_ORIGIN: ${PRIVEXIS_FRONTEND_ORIGIN:?Set the Vercel origin in deploy/oci/.env}
       PRIVEXIS_MAX_UPLOAD_MB: ${PRIVEXIS_MAX_UPLOAD_MB:-15}
       PRIVEXIS_SCAN_SAMPLE_ROWS: ${PRIVEXIS_SCAN_SAMPLE_ROWS:-500}
     volumes:
@@ -50,7 +50,7 @@ services:
       - "443:443"
       - "443:443/udp"
     volumes:
-      - ./Caddyfile.oci:/etc/caddy/Caddyfile:ro
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
       - caddy_data:/data
       - caddy_config:/config
     depends_on:
