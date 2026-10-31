@@ -21,22 +21,6 @@
 
 Privexis scans **synthetic CSV and SQLite datasets** for candidate personal-data fields, maps them to declared purpose and retention metadata, and creates an evidence inventory for human review. It reports precision and recall against a committed, manually labelled evaluation set. It does not make legal compliance or lawful-basis decisions.
 
-## Hackathon materials
-
-The original challenge brief and planning files are kept together in [`assets/hackathon/`](assets/hackathon/README.md) and linked here for quick access from the repository home page.
-
-<p>
-  <a href="assets/hackathon/Privexis.pdf"><img alt="Open hackathon problem statement" src="https://img.shields.io/badge/📄%20PROBLEM%20STATEMENT-Open%20PDF-FF8A3D?style=for-the-badge&logo=adobeacrobatreader&logoColor=white" /></a>
-  <a href="assets/hackathon/Proposed-structure-hackathon.pdf"><img alt="Open proposed project structure" src="https://img.shields.io/badge/🧭%20PROPOSED%20STRUCTURE-Open%20PDF-7B61FF?style=for-the-badge&logo=readthedocs&logoColor=white" /></a>
-  <a href="assets/hackathon/Video%20Introduction.txt"><img alt="Open team introduction link" src="https://img.shields.io/badge/🎥%20TEAM%20INTRO-Open%20video%20link-ED4264?style=for-the-badge&logo=youtube&logoColor=white" /></a>
-</p>
-
-| Material | What's inside |
-| --- | --- |
-| [Problem statement](assets/hackathon/Privexis.pdf) | PS-019 requirements and expected outcomes |
-| [Proposed structure](assets/hackathon/Proposed-structure-hackathon.pdf) | Initial project planning document |
-| [Team introduction](assets/hackathon/Video%20Introduction.txt) | Link to the team's introduction video |
-
 ## Try the working demo
 
 <p>
